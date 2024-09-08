@@ -19,6 +19,10 @@ Each notebook in this cookbook is designed to be self-contained and easy to foll
 
    - Learn how to scrape product information from fashion websites. This notebok shows how to execute existing scripts in a composable way with for loops.
 
+2. **[Scraping Ebay for Laptop Prices](https://colab.research.google.com/drive/1cXtLFnU2ac-vnjCT2q7jRxm2oiLRaDo4?usp=sharing)**
+
+   - Learn how to scrape product information from Ebay. This notebook shows how to generate and execute a script.
+
 ## 🚀 Contributing
 
 We welcome contributions to the Scrapybara Cookbook! If you have a recipe you'd like to share or improvements to existing ones, please submit a pull request.
