@@ -25,7 +25,7 @@ Each notebook in this cookbook is designed to be self-contained and easy to foll
 
 3. **[Automate Email Outreach](https://colab.research.google.com/drive/1vf52-jDH-yUtwhjITy7ysGH0EiH3Nv7_?usp=sharing)**
 
-- Learn how to use Scrapybara to automate email outreach. This notebook shows how to scrape structured data about potential customers, so we can write them personalized emails.
+   - Learn how to use Scrapybara to automate email outreach. This notebook shows how to scrape structured data about potential customers, so we can write them personalized emails.
 
 ## 🚀 Contributing
 
