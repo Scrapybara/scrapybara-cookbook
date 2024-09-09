@@ -23,6 +23,10 @@ Each notebook in this cookbook is designed to be self-contained and easy to foll
 
    - Learn how to scrape product information from Ebay. This notebook shows how to generate and execute a script.
 
+3. **[Automate Email Outreach](https://colab.research.google.com/drive/1vf52-jDH-yUtwhjITy7ysGH0EiH3Nv7_?usp=sharing)**
+
+- Learn how to use Scrapybara to automate email outreach. This notebook shows how to scrape structured data about potential customers, so we can write them personalized emails.
+
 ## 🚀 Contributing
 
 We welcome contributions to the Scrapybara Cookbook! If you have a recipe you'd like to share or improvements to existing ones, please submit a pull request.
