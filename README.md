@@ -26,7 +26,7 @@ A complete example showing how to:
 1. Clone this repository:
 
    ```bash
-   git clone https://github.com/yourusername/scrapybara-cookbook.git
+   git clone https://github.com/Scrapybara/scrapybara-cookbook.git
    cd scrapybara-cookbook
    ```
 
