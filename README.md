@@ -72,5 +72,5 @@ We welcome contributions! Please feel free to submit a Pull Request. For major c
 ## 📫 Contact
 
 - Website: [scrapybara.com](https://scrapybara.com)
-- Twitter: [@ScrapybaraAI](https://x.com/scrapybara)
+- Twitter: [@scrapybara](https://x.com/scrapybara)
 - Email: hello@scrapybara.com
