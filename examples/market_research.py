@@ -104,14 +104,14 @@ async def research_company(company_name: str):
     # Initialize Scrapybara VM
     s = Scrapybara(api_key=SCRAPYBARA_API_KEY)
     instance = s.start(instance_type="medium")
-    print(f"Started Scrapybara instance: {instance.instance_id}")
-    print(f"Instance URL: {s.get_stream_url(instance.instance_id)}")
+    print(f"Started Scrapybara instance: {instance.id}")
+    print(f"Instance URL: {instance.url}")
 
     # Initialize tools
     tools = ToolCollection(
-        ComputerTool(s, instance.instance_id),
-        BashTool(s, instance.instance_id),
-        EditTool(s, instance.instance_id)
+        ComputerTool(instance),
+        BashTool(instance),
+        EditTool(instance)
     )
 
     # Initialize chat with Claude
@@ -186,6 +186,7 @@ async def research_company(company_name: str):
             # No more tools used - task complete
             break
 
+    instance.stop()
     print("\nResearch complete! Documents have been saved.")
 
 if __name__ == "__main__":
