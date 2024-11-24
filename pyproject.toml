@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-scrapybara = "^0.1.12"
+scrapybara = "^0.2.0"
 python-dotenv = "^1.0.1"
 
 
