@@ -505,13 +505,13 @@ use-chardet-on-py3 = ["chardet (>=3.0.2,<6)"]
 
 [[package]]
 name = "scrapybara"
-version = "0.1.12"
+version = "0.2.2"
 description = "Official Python client for Scrapybara"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "scrapybara-0.1.12-py3-none-any.whl", hash = "sha256:220ba81ab670162cec3a570b3a41686362d350d407e9d15fbd7d5130a596185c"},
-    {file = "scrapybara-0.1.12.tar.gz", hash = "sha256:7be0d606f8acc2beb1069f38cce7a35377a87496e6fd4be6f92a65562a5cad7c"},
+    {file = "scrapybara-0.2.2-py3-none-any.whl", hash = "sha256:cd5e4547856459f503e599a15ef8ba85dbe3c6f1007094463fb5c21b5c54136a"},
+    {file = "scrapybara-0.2.2.tar.gz", hash = "sha256:d5f3977da6ab60d4e56185506e86144705f96a20bbfa0cfc780b1c0039bf41b2"},
 ]
 
 [package.dependencies]
@@ -561,4 +561,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "fc58f7cef172f6b4794202db4b534dcb16bc0de495345b227f8fd1947e3b09a8"
+content-hash = "a715f678ddbdec608e4fbf07a3877453d4dea50e42d7bed67065e1bfd31ec02e"

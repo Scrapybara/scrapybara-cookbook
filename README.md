@@ -13,13 +13,35 @@ A comprehensive collection of examples and recipes for using Scrapybara - the vi
 
 ### 🔍 Market Research Assistant
 
-A complete example showing how to:
+Research and analyze market opportunities by:
 
-- Launch and control Firefox for web research
-- Take organized notes using LibreOffice Writer
-- Create summary spreadsheets in LibreOffice Calc
-- Manage files and documents systematically
-- Integrate with Claude for intelligent automation
+- Conducting thorough web-based market analysis
+- Identifying industry trends and patterns
+- Evaluating market size and potential
+- Analyzing competitor landscapes
+- Creating comprehensive research reports
+
+### 🔍 Sales Research Assistant
+
+Streamline sales prospecting through:
+
+- In-depth company research and profiling
+- Lead qualification and prioritization
+- Technology stack analysis
+- Pain point identification
+- Automated outreach preparation
+- Sales intelligence documentation
+
+### 🔍 Competitive Intelligence Assistant
+
+Monitor and analyze competitors with:
+
+- Real-time competitor website tracking
+- Product and feature comparison analysis
+- Pricing strategy monitoring
+- Marketing message evaluation
+- Strategic shift identification
+- Trend analysis and reporting
 
 ## 🚀 Getting Started
 
@@ -56,6 +78,8 @@ scrapybara-cookbook/
 ├── pyproject.toml      # Poetry dependencies and configuration
 └── examples/           # Example scripts
     └── market_research.py
+    └── sales_research.py
+    └── competitive_intel.py
 ```
 
 ## 🛠️ Dependencies

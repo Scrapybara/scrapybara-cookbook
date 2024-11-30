@@ -1,16 +1,13 @@
 import asyncio
 import os
-from typing import Any, cast
+from typing import List
 from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv(".env.example")
 
 from anthropic import Anthropic
-from anthropic.types.beta import (
-    BetaToolResultBlockParam,
-    BetaMessageParam,
-)
+from anthropic.types.beta import BetaToolResultBlockParam, BetaMessageParam
 
 from scrapybara import Scrapybara
 from scrapybara.anthropic import BashTool, ComputerTool, EditTool, ToolResult
@@ -32,23 +29,32 @@ SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
 <IMPORTANT>
 * When using Firefox, if a startup wizard appears, IGNORE IT.  Do not even click "skip this step".  Instead, click on the address bar where it says "Search or enter address", and enter the appropriate search term or URL there.
 * If the item you are looking at is a pdf, if after taking a single screenshot of the pdf it seems that you want to read the entire document instead of trying to continue to read the pdf from your screenshots + navigation, determine the URL, use curl to download the pdf, install and use pdftotext to convert it to a text file, and then read that text file directly with your StrReplaceEditTool.
+* If you are at the beginning of the conversation and take a screenshot, the screen may show up black. In this case just move the mouse to the center of the screen and do a left click. Then screenshot again.
 </IMPORTANT>
 
-You are a market research assistant using a Linux virtual desktop. Your task is to:
-1. Research a given company/product using Firefox
-2. Take organized notes in LibreOffice Writer
-3. Create a summary spreadsheet in LibreOffice Calc
-4. Save all documents in an organized way
+You are a sales research assistant using a Linux virtual desktop. Your task is to:
+1. Research companies using Firefox to find:
+   - Company overview and size
+   - Recent news and developments
+   - Technologies used
+   - Key decision makers
+   - Pain points and opportunities
+2. Create detailed research notes in LibreOffice Writer
+3. Build a structured spreadsheet in LibreOffice Calc for sales metrics
+4. Generate draft outreach messaging
+5. Save all materials in an organized folder structure
 
 Guidelines:
 - Launch GUI apps using bash with DISPLAY=:1 
 - Take screenshots to verify your actions
-- Save files in the Documents folder
+- Save files in the Documents/sales_research folder
 - Format documents professionally
+- Focus on finding actionable sales insights
+- Note potential trigger events for outreach
+- Look for compelling reasons to engage
 """
 
 class ToolCollection:
-    """A collection of anthropic-defined tools."""
     def __init__(self, *tools):
         self.tools = tools
         self.tool_map = {tool.to_params()["name"]: tool for tool in tools}
@@ -56,19 +62,17 @@ class ToolCollection:
     def to_params(self) -> list:
         return [tool.to_params() for tool in self.tools]
 
-    async def run(self, *, name: str, tool_input: dict[str, Any]) -> ToolResult:
+    async def run(self, *, name: str, tool_input: dict) -> ToolResult:
         tool = self.tool_map.get(name)
         if not tool:
             return None
         try:
-            r = await tool(**tool_input)
-            return r
+            return await tool(**tool_input)
         except Exception as e:
             print(f"Error running tool {name}: {e}")
             return None
 
-def make_tool_result(result, tool_use_id: str) -> BetaToolResultBlockParam:
-    """Convert tool result to API format"""
+def make_tool_result(result: ToolResult, tool_use_id: str) -> BetaToolResultBlockParam:
     tool_result_content = []
     is_error = False
     
@@ -98,8 +102,8 @@ def make_tool_result(result, tool_use_id: str) -> BetaToolResultBlockParam:
         "is_error": is_error,
     }
 
-async def research_company(company_name: str):
-    """Perform market research on a company using AI-driven desktop automation"""
+async def research_company(company_name: str, industry: str = None, notes: str = None):
+    """Perform automated sales research on a company"""
     
     # Initialize Scrapybara VM
     s = Scrapybara(api_key=SCRAPYBARA_API_KEY)
@@ -118,11 +122,18 @@ async def research_company(company_name: str):
     messages = []
 
     # Initial research command
-    research_command = f"""Please help me research {company_name}. Follow these steps:
-    1. Launch Firefox and search for the company
-    2. Open LibreOffice Writer to take detailed notes
-    3. Create a spreadsheet summarizing key metrics
-    4. Save all documents in Documents folder
+    research_command = f"""Please help me research {company_name}{f' in the {industry} industry' if industry else ''} for sales outreach.
+    
+    {f'Additional context: {notes}' if notes else ''}
+    
+    Please:
+    1. Research the company thoroughly
+    2. Create detailed notes in a well-organized document
+    3. Build a sales intelligence spreadsheet
+    4. Draft potential outreach messages
+    5. Save everything in Documents/sales_research/{company_name}
+
+    Focus on finding compelling reasons to engage and potential pain points we could address.
     """
 
     messages.append({
@@ -153,13 +164,11 @@ async def research_company(company_name: str):
                     tool_input=content.input
                 )
                 
-                # Handle empty bash results by taking a screenshot
                 if content.name == "bash" and not result:
                     result = await tools.run(
                         name="computer",
                         tool_input={"action": "screenshot"}
                     )
-                    print(f"Took fallback screenshot after empty bash result")
                 
                 if result:
                     tool_result = make_tool_result(result, content.id)
@@ -182,11 +191,34 @@ async def research_company(company_name: str):
                 "content": tool_results
             })
         else:
-            # No more tools used - task complete
             break
 
     instance.stop()
-    print("\nResearch complete! Documents have been saved.")
+    print(f"\nResearch complete for {company_name}! Documents saved in Documents/sales_research/{company_name}")
+
+async def batch_research(companies: List[dict]):
+    """Research multiple companies in sequence"""
+    for company in companies:
+        print(f"\nStarting research for {company['name']}...")
+        await research_company(
+            company_name=company["name"],
+            industry=company.get("industry"),
+            notes=company.get("notes")
+        )
 
 if __name__ == "__main__":
-    asyncio.run(research_company("Anthropic"))
+    # Example usage
+    companies = [
+        {
+            "name": "TechCorp Solutions",
+            "industry": "Enterprise Software",
+            "notes": "Recently raised Series B, expanding engineering team"
+        },
+        {
+            "name": "DataFlow Analytics",
+            "industry": "Data Analytics",
+            "notes": "Looking to improve their ML pipeline efficiency"
+        }
+    ]
+    
+    asyncio.run(batch_research(companies))

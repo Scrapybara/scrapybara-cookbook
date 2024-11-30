@@ -1,16 +1,13 @@
 import asyncio
 import os
-from typing import Any, cast
+from typing import List, Optional
 from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv(".env.example")
 
 from anthropic import Anthropic
-from anthropic.types.beta import (
-    BetaToolResultBlockParam,
-    BetaMessageParam,
-)
+from anthropic.types.beta import BetaToolResultBlockParam, BetaMessageParam
 
 from scrapybara import Scrapybara
 from scrapybara.anthropic import BashTool, ComputerTool, EditTool, ToolResult
@@ -32,23 +29,32 @@ SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
 <IMPORTANT>
 * When using Firefox, if a startup wizard appears, IGNORE IT.  Do not even click "skip this step".  Instead, click on the address bar where it says "Search or enter address", and enter the appropriate search term or URL there.
 * If the item you are looking at is a pdf, if after taking a single screenshot of the pdf it seems that you want to read the entire document instead of trying to continue to read the pdf from your screenshots + navigation, determine the URL, use curl to download the pdf, install and use pdftotext to convert it to a text file, and then read that text file directly with your StrReplaceEditTool.
+* If you are at the beginning of the conversation and take a screenshot, the screen may show up black. In this case just move the mouse to the center of the screen and do a left click. Then screenshot again.
 </IMPORTANT>
 
-You are a market research assistant using a Linux virtual desktop. Your task is to:
-1. Research a given company/product using Firefox
-2. Take organized notes in LibreOffice Writer
-3. Create a summary spreadsheet in LibreOffice Calc
-4. Save all documents in an organized way
+You are a competitive intelligence analyst using a Linux virtual desktop. Your task is to:
+1. Research competitor websites and public information using Firefox
+2. Track and document:
+   - Product offerings and features
+   - Pricing changes
+   - Marketing messaging
+   - Target markets
+   - Recent announcements
+3. Maintain structured data in LibreOffice Calc
+4. Create detailed analysis in LibreOffice Writer
+5. Generate visual comparisons and trends
+6. Highlight key changes and developments
 
 Guidelines:
 - Launch GUI apps using bash with DISPLAY=:1 
 - Take screenshots to verify your actions
-- Save files in the Documents folder
-- Format documents professionally
+- Save files in Documents/competitive_intel
+- Focus on actionable insights
+- Note significant changes from previous analysis
+- Look for strategic shifts and new directions
 """
 
 class ToolCollection:
-    """A collection of anthropic-defined tools."""
     def __init__(self, *tools):
         self.tools = tools
         self.tool_map = {tool.to_params()["name"]: tool for tool in tools}
@@ -56,19 +62,17 @@ class ToolCollection:
     def to_params(self) -> list:
         return [tool.to_params() for tool in self.tools]
 
-    async def run(self, *, name: str, tool_input: dict[str, Any]) -> ToolResult:
+    async def run(self, *, name: str, tool_input: dict) -> ToolResult:
         tool = self.tool_map.get(name)
         if not tool:
             return None
         try:
-            r = await tool(**tool_input)
-            return r
+            return await tool(**tool_input)
         except Exception as e:
             print(f"Error running tool {name}: {e}")
             return None
 
-def make_tool_result(result, tool_use_id: str) -> BetaToolResultBlockParam:
-    """Convert tool result to API format"""
+def make_tool_result(result: ToolResult, tool_use_id: str) -> BetaToolResultBlockParam:
     tool_result_content = []
     is_error = False
     
@@ -98,8 +102,13 @@ def make_tool_result(result, tool_use_id: str) -> BetaToolResultBlockParam:
         "is_error": is_error,
     }
 
-async def research_company(company_name: str):
-    """Perform market research on a company using AI-driven desktop automation"""
+async def analyze_competitor(
+    competitor_name: str,
+    website: str,
+    focus_areas: Optional[List[str]] = None,
+    previous_analysis_date: Optional[str] = None
+):
+    """Perform competitive analysis on a single competitor"""
     
     # Initialize Scrapybara VM
     s = Scrapybara(api_key=SCRAPYBARA_API_KEY)
@@ -117,17 +126,29 @@ async def research_company(company_name: str):
     client = Anthropic(api_key=ANTHROPIC_API_KEY)
     messages = []
 
-    # Initial research command
-    research_command = f"""Please help me research {company_name}. Follow these steps:
-    1. Launch Firefox and search for the company
-    2. Open LibreOffice Writer to take detailed notes
-    3. Create a spreadsheet summarizing key metrics
-    4. Save all documents in Documents folder
+    # Initial analysis command
+    analysis_command = f"""Please help me analyze competitor {competitor_name} ({website}).
+    
+    Focus areas: {', '.join(focus_areas) if focus_areas else 'All aspects'}
+    {f'Compare to previous analysis from: {previous_analysis_date}' if previous_analysis_date else ''}
+    
+    Please:
+    1. Research their website and public information
+    2. Document current state of:
+       - Product offerings
+       - Pricing (if public)
+       - Marketing messages
+       - Target markets
+    3. Create comparison spreadsheets
+    4. Generate analysis document
+    5. Save everything in Documents/competitive_intel/{competitor_name}
+
+    Focus on identifying significant changes and strategic implications.
     """
 
     messages.append({
         "role": "user",
-        "content": [{"type": "text", "text": research_command}],
+        "content": [{"type": "text", "text": analysis_command}],
     })
 
     while True:
@@ -153,13 +174,11 @@ async def research_company(company_name: str):
                     tool_input=content.input
                 )
                 
-                # Handle empty bash results by taking a screenshot
                 if content.name == "bash" and not result:
                     result = await tools.run(
                         name="computer",
                         tool_input={"action": "screenshot"}
                     )
-                    print(f"Took fallback screenshot after empty bash result")
                 
                 if result:
                     tool_result = make_tool_result(result, content.id)
@@ -182,11 +201,39 @@ async def research_company(company_name: str):
                 "content": tool_results
             })
         else:
-            # No more tools used - task complete
             break
 
     instance.stop()
-    print("\nResearch complete! Documents have been saved.")
+    print(f"\nAnalysis complete for {competitor_name}! Documents saved in Documents/competitive_intel/{competitor_name}")
+
+async def analyze_market(competitors: List[dict]):
+    """Analyze multiple competitors in sequence"""
+    today = datetime.today().strftime('%Y-%m-%d')
+    
+    for competitor in competitors:
+        print(f"\nStarting analysis for {competitor['name']}...")
+        await analyze_competitor(
+            competitor_name=competitor["name"],
+            website=competitor["website"],
+            focus_areas=competitor.get("focus_areas"),
+            previous_analysis_date=competitor.get("last_analysis")
+        )
 
 if __name__ == "__main__":
-    asyncio.run(research_company("Anthropic"))
+    # Example usage
+    competitors = [
+        {
+            "name": "MainCompetitor",
+            "website": "https://maincompetitor.com",
+            "focus_areas": ["Enterprise Features", "Pricing", "Marketing Messages"],
+            "last_analysis": "2024-02-15"
+        },
+        {
+            "name": "NewEntrant",
+            "website": "https://newentrant.io",
+            "focus_areas": ["Product Features", "Target Market"],
+            "last_analysis": None
+        }
+    ]
+    
+    asyncio.run(analyze_market(competitors))
