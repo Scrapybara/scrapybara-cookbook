@@ -21,7 +21,7 @@ Research and analyze market opportunities by:
 - Analyzing competitor landscapes
 - Creating comprehensive research reports
 
-### 🔍 Sales Research Assistant
+### 👨‍💼 Sales Research Assistant
 
 Streamline sales prospecting through:
 
@@ -42,6 +42,25 @@ Monitor and analyze competitors with:
 - Marketing message evaluation
 - Strategic shift identification
 - Trend analysis and reporting
+
+### 🤖 GitHub Analysis Assistant
+
+Analyze a GitHub profile and its repositories with:
+
+- Browser authentication
+- In-depth repository analysis
+- Technology stack identification
+- Codebase structure and complexity analysis
+- Contribution and community engagement analysis
+
+### 💻 Code Execution Assistant
+
+Execute code and generate results with:
+
+- Python code execution
+- Data visualization
+- Sorting algorithm implementation and benchmarking
+- DataFrame operations with pandas
 
 ## 🚀 Getting Started
 

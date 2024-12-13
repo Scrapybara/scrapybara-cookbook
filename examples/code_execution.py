@@ -20,6 +20,7 @@ SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
 * You can execute Python code directly in the environment using the code_execution tool.
 * Available packages include numpy, pandas, matplotlib, scikit-learn, and other common data science libraries.
 * You can also use bash commands and control the virtual desktop if needed.
+* To open chromium, use: "(DISPLAY=:1 chromium --no-sandbox &)" in the terminal
 * The current date is {datetime.today().strftime('%A, %B %-d, %Y')}.
 </SYSTEM_CAPABILITY>
 
@@ -76,19 +77,23 @@ class CodeExecutionTool:
         try:
             response = await self.instance.code.execute(
                 code=code,
-                timeout=timeout
+                timeout=timeout,
+                kernel_name="python3"
             )
             
-            # Extract output from the new response format
+            # Extract output from the response format
             output = ""
-            for output_item in response.get("outputs", []):
-                if output_item.get("type") == "stream" and output_item.get("name") == "stdout":
-                    output += output_item.get("text", "")
+            if isinstance(response, dict):  # Handle both dict and direct output formats
+                for output_item in response.get("outputs", []):
+                    if output_item.get("type") == "stream" and output_item.get("name") == "stdout":
+                        output += output_item.get("text", "")
+            else:
+                output = str(response)
             
             return ToolResult(
                 output=output,
-                error=response.get("error"),
-                base64_image=None  # Image handling would need to be updated if supported
+                error=response.get("error") if isinstance(response, dict) else None,
+                base64_image=None
             )
         except Exception as e:
             return ToolResult(error=str(e))

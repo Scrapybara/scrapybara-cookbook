@@ -16,7 +16,7 @@ ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 SCRAPYBARA_API_KEY = os.getenv("SCRAPYBARA_API_KEY")
 
 SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
-* You are utilizing an Ubuntu virtual machine with Firefox browser installed
+* You are utilizing an Ubuntu virtual machine with Chromium browser installed
 * You can navigate repositories and analyze code
 * You can take screenshots of interesting findings
 * The current date is {datetime.today().strftime('%A, %B %-d, %Y')}
@@ -38,7 +38,7 @@ Guidelines:
 - Consider both quantitative and qualitative aspects
 
 <IMPORTANT>
-* When using Firefox, if a startup wizard appears, IGNORE IT. Click directly on the address bar.
+* When using Chromium, if a startup wizard appears, IGNORE IT. Click directly on the address bar.
 * Always wait for pages to fully load before analysis
 * Take screenshots of significant findings
 * Save your analysis in organized documents
@@ -93,18 +93,21 @@ def make_tool_result(result: ToolResult, tool_use_id: str) -> BetaToolResultBloc
         "is_error": is_error,
     }
 
-async def analyze_github_profile(github_username: str, description: str = None):
+async def analyze_github_profile(github_username: str, context_id: str, description: str = None):
     """Analyze a GitHub profile and its repositories"""
     
-    # Initialize Scrapybara VM
+    # Initialize Scrapybara VM with explicit instance type
     s = Scrapybara(api_key=SCRAPYBARA_API_KEY)
     instance = s.start(instance_type="medium")
     print(f"Started Scrapybara instance: {instance.id}")
 
     try:
-        # Start browser and authenticate
+        # Start browser with explicit CDP URL handling
         cdp_url = instance.browser.start()
-        instance.browser.authenticate()
+        print(f"Browser started with CDP URL: {cdp_url}")
+        
+        # Authenticate browser with context ID
+        instance.browser.authenticate(context_id=context_id)
 
         # Initialize tools
         tools = ToolCollection(
@@ -189,18 +192,20 @@ async def analyze_github_profile(github_username: str, description: str = None):
 
     finally:
         instance.stop()
-        print(f"\nAnalysis complete for {github_username}! Results saved in Documents/github_research/{github_username}/")
+        print(f"\nAnalysis complete for {github_username}!")
 
 async def run_example_analyses():
     """Run example GitHub profile analyses"""
     analyses = [
         {
             "username": "anthropics",
-            "description": "Focus on AI research repositories and documentation"
+            "description": "Focus on AI research repositories and documentation",
+            "context_id": "anthropics-analysis"
         },
         {
             "username": "openai",
-            "description": "Analyze main project repositories and community engagement"
+            "description": "Analyze main project repositories and community engagement",
+            "context_id": "openai-analysis"
         }
     ]
     
@@ -208,7 +213,8 @@ async def run_example_analyses():
         print(f"\nStarting analysis of {analysis['username']}...")
         await analyze_github_profile(
             github_username=analysis["username"],
-            description=analysis["description"]
+            description=analysis["description"],
+            context_id=analysis["context_id"]
         )
 
 if __name__ == "__main__":
