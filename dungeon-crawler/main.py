@@ -7,7 +7,7 @@ from scrapybara.anthropic import BashTool, ComputerTool, EditTool, ToolResult
 from dotenv import load_dotenv
 import os
 
-SYSTEM_PROMPT = """<SYSTEM_CAPABILITY>
+SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
 * You have access to an Ubuntu virtual machine with internet connectivity
 * You can install Ubuntu applications using the bash tool (use curl over wget)
 * To run GUI applications with the bash tool:
@@ -72,7 +72,7 @@ class GameAgent:
     def start(self):
         """Start Scrapybara instance and install game"""
         print("Starting Scrapybara instance...")
-        self.instance = self.scrapybara.start(instance_type="large")
+        self.instance = self.scrapybara.start_ubuntu()
 
         # Install DCSS using bash
         install_cmd = "sudo apt-get install -y crawl-tiles"

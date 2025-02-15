@@ -1,11 +1,11 @@
 from .prompt import SYSTEM_PROMPT
 from .helpers import ToolCollection, make_tool_result
-from scrapybara.client import Instance
+from scrapybara.client import BaseInstance
 from anthropic import Anthropic
 from rich import print
 
 
-async def run_agent(instance: Instance, tools: ToolCollection, prompt: str) -> None:
+async def run_agent(instance: BaseInstance, tools: ToolCollection, prompt: str) -> None:
     anthropic = Anthropic()
 
     stream_url = instance.get_stream_url().stream_url

@@ -1,7 +1,7 @@
 from scrapybara import Scrapybara
 from scrapybara.anthropic import Anthropic
 from scrapybara.tools import BashTool, ComputerTool, EditTool, BrowserTool
-from scrapybara.prompts import SYSTEM_PROMPT
+from scrapybara.prompts import UBUNTU_SYSTEM_PROMPT
 from pydantic import BaseModel
 from typing import List
 from dotenv import load_dotenv
@@ -42,7 +42,7 @@ def main():
     )
 
     # 1. Start instance
-    instance = client.start(instance_type="large")
+    instance = client.start_ubuntu()
     instance.browser.start()
 
     try:
@@ -59,7 +59,7 @@ def main():
         companies_response = client.act(
             model=model,
             tools=tools,
-            system=SYSTEM_PROMPT,
+            system=UBUNTU_SYSTEM_PROMPT,
             prompt="Go to https://ycombinator.com/companies, set batch filter to W25, and scrape all W25 companies, don't evaluate any code, just look at the HTML and return structured data.",
             schema=Companies,
             on_step=handle_step,
@@ -75,7 +75,7 @@ def main():
             contact_response = client.act(
                 model=model,
                 tools=tools,
-                system=SYSTEM_PROMPT,
+                system=UBUNTU_SYSTEM_PROMPT,
                 prompt=f"Go to https://ycombinator.com/companies and find the best way to contact YC W25 company {company.name} - {company.description}. Try their website, LinkedIn, and Twitter/X.",
                 schema=ContactInfo,
                 on_step=handle_step,
@@ -86,7 +86,7 @@ def main():
         client.act(
             model=model,
             tools=tools,
-            system=SYSTEM_PROMPT,
+            system=UBUNTU_SYSTEM_PROMPT,
             prompt=f"Open LibreOffice, draft a two sentence message to each of the following YC W25 companies, advertising a capybara zoo in Japan: {companies}",
             on_step=handle_step,
         )

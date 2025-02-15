@@ -194,9 +194,9 @@
       // Handle websocket messages
       ipcRenderer.on("websocket-message", (event, message) => {
         switch (message.type) {
-          case "stream_url":
+          case "url":
             const vnc = document.getElementById("vnc");
-            vnc.src = message.url + "?resize=scale&autoconnect=1";
+            vnc.src = message.url;
             vnc.classList.remove("hidden");
             break;
 

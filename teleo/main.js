@@ -45,7 +45,7 @@ ipcMain.handle("connect-websocket", async (event) => {
       mainWindow.webContents.send("websocket-message", message);
 
       // Modify this to create a larger window for better viewing
-      if (message.type === "stream_url") {
+      if (message.type === "url") {
         mainWindow.setSize(800, 702);
       }
     });

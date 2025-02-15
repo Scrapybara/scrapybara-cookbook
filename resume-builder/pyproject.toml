@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 playwright = "^1.49.1"
-scrapybara = "^2.0.7"
+scrapybara = "^2.2.5"
 python-dotenv = "^1.0.1"
 httpx = "0.27"
 

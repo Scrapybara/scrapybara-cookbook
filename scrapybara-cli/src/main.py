@@ -19,7 +19,8 @@ app = typer.Typer()
 @app.command()
 def main(
     instance_type: str = typer.Option(
-        "small", help="Size of the instance. Must be one of: 'small', 'medium', 'large'"
+        "ubuntu",
+        help="Type of instance to start. Must be one of: 'ubuntu', 'browser', 'windows'",
     )
 ):
     """
@@ -41,9 +42,9 @@ def main(
         if not anthropic_key:
             raise typer.BadParameter("Anthropic API key is required to continue.")
 
-    if instance_type not in ["small", "medium", "large"]:
+    if instance_type not in ["ubuntu", "browser", "windows"]:
         raise typer.BadParameter(
-            'instance_type must be one of: "small", "medium", "large"'
+            'instance_type must be one of: "ubuntu", "browser", "windows"'
         )
 
     # Initialize Scrapybara with the API key
@@ -57,19 +58,25 @@ async def async_main(instance_type: str, scrapybara: Scrapybara):
         with console.status(
             "[bold green]Starting instance...[/bold green]", spinner="dots"
         ) as status:
-            instance = scrapybara.start(instance_type=instance_type)
+            if instance_type == "ubuntu":
+                instance = scrapybara.start_ubuntu()
+            elif instance_type == "browser":
+                instance = scrapybara.start_browser()
+            elif instance_type == "windows":
+                instance = scrapybara.start_windows()
             status.update("[bold green]Instance started![/bold green]")
 
         stream_url = instance.get_stream_url().stream_url
-        print(
-            f"[bold blue]Stream URL: {stream_url}/?resize=scale&autoconnect=1[/bold blue]"
-        )
+        print(f"[bold blue]Stream URL: {stream_url}[/bold blue]")
 
-        tools = ToolCollection(
-            ComputerTool(instance),
-            BashTool(instance),
-            EditTool(instance),
-        )
+        if instance_type == "ubuntu":
+            tools = ToolCollection(
+                ComputerTool(instance),
+                BashTool(instance),
+                EditTool(instance),
+            )
+        else:
+            tools = ToolCollection(ComputerTool(instance))
 
         while True:
             prompt = input("> ")

@@ -74,7 +74,7 @@ class WebsiteCopycat:
     async def start(self):
         """Start Scrapybara instance and browser"""
         print("Starting Scrapybara instance...")
-        self.instance = self.scrapybara.start(instance_type="small")
+        self.instance = self.scrapybara.start_ubuntu()
         print("Instance started: ", self.instance.id)
 
         # Start browser session
