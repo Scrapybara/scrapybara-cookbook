@@ -1,74 +1,31 @@
 <div id="toc" align="center">
   <ul style="list-style: none">
     <summary>
-      <h1><img src="images/wow.gif" alt="Scrapybara" width="24"> Scrapybara Demos <img src="images/wow.gif" alt="Scrapybara" width="24"></h1>
+      <h1><img src="images/wow.gif" alt="Scrapybara" width="24"> Scrapybara Cookbook <img src="images/wow.gif" alt="Scrapybara" width="24"></h1>
     </summary>
   </ul>
 </div>
 
 <p align="center">
-  Official Scrapybara demos as seen on <a href="https://x.com/scrapybara">X</a>
-</p>
-
-<p align="center">
   <a href="https://github.com/scrapybara/scrapybara-playground/blob/main/license"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue" /></a>
-  <a href="https://discord.gg/s4bPUVFXqA"><img alt="Discord" src="https://img.shields.io/badge/Discord-Join%20the%20community-yellow.svg?logo=discord" /></a>
+  <a href="https://discord.gg/s4bPUVFXqA"><img alt="Discord" src="https://img.shields.io/badge/Discord-Join%20the%20community-cyan.svg?logo=discord" /></a>
+  <a href="https://x.com/scrapybara"><img alt="X" src="https://img.shields.io/badge/Twitter-Follow%20us-cyan.svg?logo=X" /></a>
 </p>
 
-## Demos
+> ✨ Read more about each example at [computer.new/cookbook](https://computer.new/cookbook)
 
-### DCSS Game Agent
+Example code and guides for building with the [Scrapybara API](https://docs.scrapybara.com). To run these examples, you'll need a Scrapybara account and associated API key ([create a free account here](https://accounts.scrapybara.com/sign-up)). Set an environment variable called `SCRAPYBARA_API_KEY` with your API key.
 
-An AI-powered agent that plays Dungeon Crawl Stone Soup autonomously, making real-time decisions and demonstrating complex game interactions. [Learn more](dcss-agent/)
+Code examples are written in Python and TypeScript with the [Act SDK](https://docs.scrapybara.com/act-sdk).
 
-### Website Copycat
+Each example is a self-contained project that can be run locally. To run an example, navigate to its directory and follow its README for specific setup instructions.
 
-An AI tool that creates single-file replicas of websites, demonstrating visual analysis and HTML generation capabilities. [Learn more](website-copycat/)
+## Contributing
 
-### Teleo Desktop Assistant
+The Scrapybara Cookbook is a community-driven resource. Whether you're submitting an idea, fixing a typo, adding a new guide, or improving an existing one, your contributions are greatly appreciated!
 
-A lightweight Electron application that provides a seamless interface for interacting with AI agents in virtual desktop environments. [Learn more](teleo/)
+Before contributing, read through the existing issues and pull requests to see if someone else is already working on something similar. That way you can avoid duplicating efforts.
 
-### W25 Scraping
+If there are examples or guides you'd like to see, feel free to suggest them on the [issues page](https://github.com/scrapybara/scrapybara-cookbook/issues).
 
-A demonstration of Scrapybara's agent endpoints for automated data collection and processing of YC W25 companies. [Learn more](w25-scraping/)
-
-### AI Resume Builder
-
-An automated resume tailoring system that uses LinkedIn job postings to generate customized resumes. The tool uses Scrapybara, Playwright, and Claude to analyze job requirements and create professionally formatted resumes optimized for ATS systems. [Learn more](resume-builder/)
-
-## Prerequisites
-
-- Scrapybara API key (get one at [scrapybara.com](https://scrapybara.com))
-
-## Getting Started
-
-1. Clone the repository
-
-```bash
-git clone https://github.com/scrapybara/scrapybara-demos.git
-cd scrapybara-demos
-```
-
-2. Choose a demo project and follow its README for specific setup instructions.
-
-## Project Structure
-
-```
-scrapybara-demos/
-├── dcss-agent/         # AI-powered game playing agent
-├── teleo/             # Desktop assistant for AI agents
-├── w25-scraping/      # YC W25 company data scraping
-├── website-copycat/   # Website replication tool
-└── README.md
-```
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Community
-
-- Follow us on [X/Twitter](https://x.com/scrapybara)
-- Join our [Discord](https://discord.gg/s4bPUVFXqA)
-- Report issues on [GitHub](https://github.com/Scrapybara/scrapybara-demos/issues)
+If you'd like to create new examples, make sure to read through our [contribution guidelines](/CONTRIBUTING.md). We welcome high-quality submissions, as long as they meet our criteria and fit within the scope of the cookbook.

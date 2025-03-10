@@ -1,0 +1,29 @@
+{
+  "name": "scrapybara-ts-template",
+  "version": "1.0.0",
+  "description": "TypeScript template for Scrapybara",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "postinstall": "pnpm exec playwright install"
+  },
+  "keywords": [
+    "scrapybara"
+  ],
+  "author": "Scrapybara",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "5",
+    "dotenv": "^16.4.7",
+    "playwright": "^1.51.0",
+    "scrapybara": "^2.3.8",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.6",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
