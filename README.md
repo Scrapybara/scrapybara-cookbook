@@ -8,11 +8,15 @@
 
 <p align="center">
   <a href="https://github.com/scrapybara/scrapybara-playground/blob/main/license"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-blue" /></a>
-  <a href="https://discord.gg/s4bPUVFXqA"><img alt="Discord" src="https://img.shields.io/badge/Discord-Join%20the%20community-cyan.svg?logo=discord" /></a>
-  <a href="https://x.com/scrapybara"><img alt="X" src="https://img.shields.io/badge/Twitter-Follow%20us-cyan.svg?logo=X" /></a>
+  <a href="https://discord.gg/s4bPUVFXqA"><img alt="Discord" src="https://img.shields.io/badge/Discord-Join%20the%20community-6D1CCF.svg?logo=discord" /></a>
+  <a href="https://x.com/scrapybara"><img alt="X" src="https://img.shields.io/badge/Twitter-Follow%20us-6D1CCF.svg?logo=X" /></a>
 </p>
 
+<br />
+
 > ✨ Read more about each example at [computer.new/cookbook](https://computer.new/cookbook)
+
+<br />
 
 Example code and guides for building with the [Scrapybara API](https://docs.scrapybara.com). To run these examples, you'll need a Scrapybara account and associated API key ([create a free account here](https://accounts.scrapybara.com/sign-up)). Set an environment variable called `SCRAPYBARA_API_KEY` with your API key.
 
