@@ -1,4 +1,4 @@
-# Copycapy
+# CopyCapy
 
 <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-blue.svg?logo=TypeScript&logoColor=white" />
 
@@ -23,7 +23,7 @@ Scrape and transform websites into capybara-themed versions with Scrapybara Act 
 
 ```bash
 git clone https://github.com/scrapybara/scrapybara-cookbook.git
-cd scrapybara-cookbook/website-copycat
+cd scrapybara-cookbook/copycapy
 ```
 
 2. Install dependencies:
@@ -66,7 +66,7 @@ pnpm start
 
 Watch the magic happen with the logged stream URL or on your [Scrapybara dashboard](https://scrapybara.com/dashboard).
 
-By default, the tool will transform Y Combinator's website. To customize which website to capyfy:
+By default, CopyCapy will transform Y Combinator's website. To customize which website to capyfy:
 
 1. Open `src/index.ts`
 2. Find the line with `new CopyCapy().capyfy("https://ycombinator.com")`
