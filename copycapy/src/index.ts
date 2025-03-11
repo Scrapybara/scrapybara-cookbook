@@ -1,4 +1,4 @@
-import { ScrapybaraClient, UbuntuInstance } from "scrapybara";
+import { ScrapybaraClient, Scrapybara, UbuntuInstance } from "scrapybara";
 import { anthropic, UBUNTU_SYSTEM_PROMPT } from "scrapybara/anthropic";
 import { editTool, bashTool, computerTool } from "scrapybara/tools";
 import * as dotenv from "dotenv";
@@ -12,12 +12,14 @@ interface PageData {
 }
 
 class CopyCapy {
+  private model: Scrapybara.Model;
   private client: ScrapybaraClient;
   private instance: UbuntuInstance | null = null;
   private browser: Browser | null = null;
 
-  constructor(apiKey?: string) {
+  constructor(model: Scrapybara.Model, apiKey?: string) {
     dotenv.config();
+    this.model = model;
     this.client = new ScrapybaraClient({
       apiKey: apiKey || process.env.SCRAPYBARA_API_KEY,
     });
@@ -155,7 +157,7 @@ class CopyCapy {
       // Capyfy website
       console.log(chalk.yellow("₍ᐢ•(ܫ)•ᐢ₎ Starting capyfication..."));
       await this.client.act({
-        model: anthropic(),
+        model: this.model,
         tools: [
           computerTool(this.instance),
           bashTool(this.instance),
@@ -170,7 +172,6 @@ Make it fun!
 </TASK>
 
 <GUIDELINES>
-- If you need to download assets, look it up on Chromium and download it
 - Interact with Chromium using the computer tool and open pages with the address bar
 - Refresh the page after every edit to examine the changes
 - Use str_replace_editor instead to view and edit the file
@@ -195,6 +196,8 @@ Make it fun!
       });
 
       console.log(chalk.green("₍ᐢ•(ܫ)•ᐢ₎ Customization complete! ✨"));
+    } catch (error) {
+      console.error(chalk.red("₍ᐢ•(ܫ)•ᐢ₎ Error:"), error);
     } finally {
       // Cleanup
       if (this.browser) await this.browser.close();
@@ -204,8 +207,9 @@ Make it fun!
 }
 
 // Example usage
-new CopyCapy().capyfy("https://ycombinator.com").catch((error) => {
-  console.error(chalk.red("₍ᐢ•(ܫ)•ᐢ₎ Error:"), error);
-});
+const model = anthropic();
+const copyCapy = new CopyCapy(model);
+
+await copyCapy.capyfy("https://ycombinator.com");
 
 export default CopyCapy;

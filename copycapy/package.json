@@ -1,7 +1,7 @@
 {
-  "name": "scrapybara-ts-template",
+  "name": "copycapy",
   "version": "1.0.0",
-  "description": "TypeScript template for Scrapybara",
+  "description": "",
   "type": "module",
   "scripts": {
     "build": "tsc",

@@ -1,74 +1,75 @@
-from .prompt import SYSTEM_PROMPT
-from .helpers import ToolCollection, make_tool_result
-from scrapybara.client import BaseInstance
-from anthropic import Anthropic
+from typing import List, Dict, Any
+from scrapybara import Scrapybara
+from scrapybara.client import BaseInstance, BrowserInstance
+from scrapybara.types import Tool, Model, Message
+from scrapybara.anthropic import BROWSER_SYSTEM_PROMPT, UBUNTU_SYSTEM_PROMPT
+from scrapybara.tools import ComputerTool, BashTool, EditTool
 from rich import print
 
+def format_computer_action(action: str, args: Dict[str, Any]) -> str:
+    if args:
+        if action == "move_mouse":
+            return f"[bold yellow]Moving mouse to ({args['coordinates'][0]}, {args['coordinates'][1]})[/bold yellow]"
+        elif action == "click_mouse":
+            pos = f" at ({args['coordinates'][0]}, {args['coordinates'][1]})" if args.get('coordinates') else ""
+            click_desc = f"{args.get('num_clicks', 1)}x " if args.get('num_clicks', 1) > 1 else ""
+            return f"[bold yellow]{click_desc}{args['button'].title()} {args.get('click_type', 'click')}{pos}[/bold yellow]"
+        elif action == "drag_mouse":
+            start = args['path'][0]
+            end = args['path'][-1]
+            return f"[bold yellow]Dragging mouse from ({start[0]}, {start[1]}) to ({end[0]}, {end[1]})[/bold yellow]"
+        elif action == "scroll":
+            pos = f" at ({args['coordinates'][0]}, {args['coordinates'][1]})" if args.get('coordinates') else ""
+            scroll_desc = []
+            if args.get('delta_x'):
+                scroll_desc.append(f"horizontally by {args['delta_x']}")
+            if args.get('delta_y'):
+                scroll_desc.append(f"vertically by {args['delta_y']}")
+            return f"[bold yellow]Scrolling {' and '.join(scroll_desc)}{pos}[/bold yellow]"
+        elif action == "press_key":
+            keys = '+'.join(args['keys'])
+            duration = f" for {args['duration']}s" if args.get('duration') else ""
+            return f"[bold yellow]Pressing {keys}{duration}[/bold yellow]"
+        elif action == "type_text":
+            return f"[bold yellow]Typing: {args['text']}[/bold yellow]"
+        elif action == "wait":
+            return f"[bold yellow]Waiting for {args['duration']}s[/bold yellow]"
+        elif action == "take_screenshot":
+            return "[bold yellow]Taking screenshot[/bold yellow]"
+        elif action == "get_cursor_position":
+            return "[bold yellow]Getting cursor position[/bold yellow]"
+        return f"[bold yellow]{action}: {args}[/bold yellow]"
+    return f"[bold yellow]{action}: unknown args[/bold yellow]"
 
-async def run_agent(instance: BaseInstance, tools: ToolCollection, prompt: str) -> None:
-    anthropic = Anthropic()
+def handle_step(step):
+    print(step.text)
+    if step.tool_calls:
+        for call in step.tool_calls:
+            if call.tool_name == "computer":
+                print(format_computer_action(call.args["action"], call.args))
+            elif call.tool_name == "bash":
+                print(f"[green]$[/green] {call.args['command']}")
+            else:
+                print(f"[green]{call.tool_name}[/green] → {', '.join(f'{k}={v}' for k,v in call.args.items())}")
 
-    stream_url = instance.get_stream_url().stream_url
+def run_agent(client: Scrapybara, model: Model, instance: BaseInstance, messages: List[Message]) -> List[Message]:
+    # Determine which system prompt to use based on the instance type
+    if isinstance(instance, BrowserInstance):
+        system = BROWSER_SYSTEM_PROMPT
+        tools: List[Tool] = [ComputerTool(instance)]
+    else:
+        system = UBUNTU_SYSTEM_PROMPT
+        tools: List[Tool] = [ComputerTool(instance), BashTool(instance), EditTool(instance)]
 
-    messages = []
-    messages.append({"role": "user", "content": [{"type": "text", "text": prompt}]})
-
-    while True:
-        # Get Claude's response
-        response = anthropic.beta.messages.create(
-            model="claude-3-5-sonnet-20241022",
-            max_tokens=4096,
+    try:
+        response = client.act(
+            model=model,
+            tools=tools,
+            system=system,
             messages=messages,
-            system=[{"type": "text", "text": SYSTEM_PROMPT}],
-            tools=tools.to_params(),
-            betas=["computer-use-2024-10-22"],
+            on_step=handle_step,
         )
-
-        # Process tool usage
-        tool_results = []
-        for content in response.content:
-            if content.type == "text":
-                print(f"\n{content.text}")
-            elif content.type == "tool_use":
-                text = f"Running {content.name} with {content.input}"
-
-                if content.name == "computer":
-                    if content.input["action"] == "screenshot":  # type: ignore
-                        text = "[bold yellow]Taking screenshot[/bold yellow]"
-                    elif content.input["action"] == "left_click" or content.input["action"] == "right_click":  # type: ignore
-                        text = "[bold yellow]Clicking[/bold yellow]"
-                    elif content.input["action"] == "type":  # type: ignore
-                        text = "[bold yellow]Typing[/bold yellow]"
-                    elif content.input["action"] == "scroll":  # type: ignore
-                        text = "[bold yellow]Scrolling[/bold yellow]"
-                    elif content.input["action"] == "key":  # type: ignore
-                        text = f"[bold yellow]Pressing key '{content.input['text'].upper()}'[/bold yellow]"  # type: ignore
-                    elif content.input["action"] == "mouse_move":  # type: ignore
-                        text = "[bold yellow]Moving mouse[/bold yellow]"
-
-                if content.name == "bash":
-                    text = f"[green]scrapybara[/green]@[white]{stream_url.replace('http://', '').split(':')[0]}[/white]# {content.input['command']}"  # type: ignore
-
-                print(f"{text}")
-
-                result = await tools.run(
-                    name=content.name, tool_input=content.input  # type: ignore
-                )
-
-                tool_result = make_tool_result(result, content.id)
-                tool_results.append(tool_result)
-
-                if result.output:
-                    print(f"[green]{result.output}[/green]")
-                if result.error:
-                    print(f"[red]{result.error}[/red]")
-
-        # Add assistant's response and tool results to messages
-        messages.append(
-            {"role": "assistant", "content": [c.model_dump() for c in response.content]}
-        )
-
-        if tool_results:
-            messages.append({"role": "user", "content": tool_results})
-        else:
-            break
+        return response.messages
+    except Exception as e:
+        print(f"[red]Error: {str(e)}[/red]")
+        return messages

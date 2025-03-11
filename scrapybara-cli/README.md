@@ -1,87 +1,61 @@
 # Scrapybara CLI
 
+<img alt="Python" src="https://img.shields.io/badge/Python-blue.svg?logo=Python&logoColor=white" />
+
 A command line interface for Scrapybara. Originally created by [@keell0renz](https://github.com/keell0renz).
+
+## Prerequisites
+
+- Python 3.8+
+- uv
+- Scrapybara API key (get one at [scrapybara.com](https://scrapybara.com))
 
 ## Installation
 
-Simply install with pip:
+1. Clone the repository:
 
 ```bash
-pip install scrapybara-cli
+git clone https://github.com/Scrapybara/scrapybara-cookbook.git
+cd scrapybara-cookbook/scrapybara-cli
 ```
 
-Then run from anywhere:
+2. Install dependencies:
 
 ```bash
-scrapybara-cli --instance-type small
+uv sync
 ```
 
-## Development Setup
-
-For contributing/development:
+3. Copy the example environment file and add your API keys:
 
 ```bash
-pip install -e .
+cp .env.example .env
 ```
 
 ## Usage
 
-1. Set up your environment variables
-2. Run the CLI:
+The CLI supports two instance types:
+
+- `ubuntu`: Full Ubuntu VM with bash access and browser
+- `browser`: Lightweight browser-only instance
+
+Example usage:
 
 ```bash
-export ANTHROPIC_API_KEY=your_anthropic_api_key
-export SCRAPYBARA_API_KEY=your_scrapybara_api_key
+❯ uv run python -m src.main --instance-type browser
+Stream URL: ...
+> What's the weather like in Tokyo?
 ```
 
-```bash
-scrapybara-cli
+The CLI will start an interactive session where you can type natural language commands.
+
+## Project Structure
+
 ```
-
-```bash
-❯ scrapybara-cli
-Stream URL: http://52.42.218.5:6091/?resize=scale&autoconnect=1
-> Hello! Who is Deez Nuts?
-I'll help you search for information about "Deez Nuts." Let me use the web browser to look this up.
-Taking screenshot
-Let me click on the web browser icon and search for information about Deez Nuts.
-Moving mouse
-Clicking
-Moving mouse
-Clicking
-Typing
-Pressing key Return
-Based on the search results, "Deez Nuts" has two main notable meanings:
-
-1. As a Political Satire:
-- "Deez Nuts" was a satirical presidential candidate portrayed by Brady C. Olson who ran for president of the United States in 2016
-- Olson was 15 years old at the time and filed a statement of candidacy with the Federal Election Commission on July 26, 2015
-- He was a resident of Wallingford, Iowa
-
-2. As a Slang Term/Joke:
-- "Deez nuts" (or "deez nutz") is a slang term and euphemism for "testicles"
-- It's also known as the punchline of a setup joke that involves asking someone a vague question to solicit a follow-up question, before yelling out the phrase in an obnoxious manner
-- The phrase gained popularity as a joke and internet meme, particularly after the satirical presidential campaign
-
-The term has become a well-known part of internet and popular culture, combining both its use as a juvenile joke and its later adoption as a satirical political statement.
-
-Would you like me to provide more specific information about either the satirical campaign or the phrase's origins as a joke?
+.
+├── .env              # Environment variables
+├── pyproject.toml    # uv dependencies
+├── README.md         # This file
+└── src/
+    ├── agent.py      # Agent logic
+    └── main.py       # Main script
 ```
-
-Available instance types:
-
-- small
-- medium
-- large
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## Support
-
-For support, please [create an issue](https://github.com/Scrapybara/scrapybara-demos/issues) in the repository.

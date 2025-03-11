@@ -44,18 +44,6 @@ Then edit `.env` with your API keys:
 SCRAPYBARA_API_KEY=your_api_key_here
 ```
 
-## Project Structure
-
-```
-.
-├── .env              # Environment variables
-├── package.json      # pnpm dependencies and project config
-├── src/
-│   └── index.ts      # Main script
-├── tsconfig.json     # TypeScript configuration
-└── README.md         # This file
-```
-
 ## Usage
 
 Start the project with pnpm:
@@ -76,4 +64,16 @@ For example:
 
 ```typescript
 new CopyCapy().capyfy("https://example.com");
+```
+
+## Project Structure
+
+```
+.
+├── .env              # Environment variables
+├── package.json      # pnpm dependencies and project config
+├── README.md         # This file
+├── src/
+│   └── index.ts      # Main script
+└── tsconfig.json     # TypeScript configuration
 ```
