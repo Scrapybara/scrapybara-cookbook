@@ -1,150 +1,72 @@
-# DCSS Game Agent
+# Dungeon Crawler
 
-An AI-powered agent that autonomously plays Dungeon Crawl Stone Soup (DCSS) using Claude, Scrapybara, and virtual desktop automation. The agent creates characters, explores dungeons, fights monsters, and makes strategic decisions in real-time.
+<img alt="Python" src="https://img.shields.io/badge/Python-blue.svg?logo=Python&logoColor=white" />
+
+Computer-using agent that autonomously plays Dungeon Crawl Stone Soup (DCSS) with Scrapybara Act SDK. The agent creates characters, explores dungeons, fights monsters, and makes strategic decisions in real-time.
+
+DCSS is a really good vibe check for computer use agents and an evaluation on our private CapyBench.
 
 ## Features
 
-- Automated DCSS gameplay using Claude AI
-- Real-time game state analysis
-- Autonomous decision making
-- Visual interface interaction
-- Continuous gameplay loop with exit handling
+- Dungeon Crawl Stone Soup (DCSS) installation
+- Automatic character creation, game start, and gameplay loop
 
 ## Prerequisites
 
 - Python 3.8+
-- Poetry
+- uv
 - Scrapybara API key (get one at [scrapybara.com](https://scrapybara.com))
-- Anthropic API key (get one at [console.anthropic.com](https://console.anthropic.com))
 
 ## Installation
 
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/Scrapybara/scrapybara-demos.git
-cd scrapybara-demos/dcss-agent
+git clone https://github.com/Scrapybara/scrapybara-cookbook.git
+cd scrapybara-cookbook/dungeon-crawler
 ```
 
-2. Install dependencies with Poetry:
+2. Install dependencies:
 
 ```bash
-poetry install
+uv sync
 ```
 
-3. Create a `.env` file in the root directory:
+3. Copy the example environment file and add your API keys:
 
 ```bash
-SCRAPYBARA_API_KEY=your_scrapybara_api_key_here
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
+cp .env.example .env
+```
+
+Then edit `.env` with your API keys:
+
+```bash
+SCRAPYBARA_API_KEY=your_api_key_here
 ```
 
 ## Usage
 
-Run the project using Poetry:
+Run the project using uv:
 
 ```bash
-poetry run python main.py
+uv run src/main.py
 ```
 
-Or integrate the agent into your own project:
+Watch the agent play with the logged stream URL or on your [Scrapybara dashboard](https://scrapybara.com/dashboard).
 
-```python
-from game_agent import GameAgent
-import asyncio
-
-async def main():
-    agent = GameAgent(
-        scrapybara_api_key=os.getenv('SCRAPYBARA_API_KEY'),
-        anthropic_api_key=os.getenv('ANTHROPIC_API_KEY')
-    )
-
-    try:
-        agent.start()
-        await agent.play_game()
-    finally:
-        agent.cleanup()
-
-if __name__ == "__main__":
-    asyncio.run(main())
-```
-
-## How It Works
-
-1. **Instance Initialization**:
-
-   - Creates a Scrapybara instance with a virtual desktop
-   - Installs DCSS using apt-get
-   - Launches the game with graphical interface
-
-2. **Game Interaction**:
-
-   - Uses keyboard commands for movement and actions
-   - Analyzes game state through screenshots
-   - Makes strategic decisions based on visual feedback
-
-3. **AI Decision Making**:
-
-   - Claude analyzes the game screen
-   - Chooses appropriate actions based on context
-   - Maintains game state awareness
-   - Responds to events and combat situations
-
-4. **Tool Integration**:
-   - `ComputerTool`: Handles keyboard/mouse input and screenshots
-   - `BashTool`: Manages game installation and launching
-   - `EditTool`: Processes game text and output
-
-## Game Controls
-
-The AI agent understands and uses standard DCSS controls:
-
-- Movement: yuhjklbn (8 directions)
-- Actions:
-  - `?` - Help
-  - `i` - Inventory
-  - `g` - Pick up items
-  - `f` - Fire ranged weapon
-  - `q` - Quaff potion
-  - `r` - Read scroll
-
-## Configuration
-
-### Environment Variables
-
-Required environment variables in `.env`:
-
-```bash
-SCRAPYBARA_API_KEY=your_scrapybara_api_key
-ANTHROPIC_API_KEY=your_anthropic_api_key
-```
-
-### Game Settings
-
-The agent uses a large instance type for better performance:
-
-```python
-self.instance = self.scrapybara.start(instance_type="large")
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## Support
-
-For support, please [create an issue](https://github.com/Scrapybara/scrapybara-demos/issues) in the repository.
+The script will launch an Ubuntu instance, install Dungeon Crawl Stone Soup, create a character, and start the game.
 
 ## Game Information
 
-[Dungeon Crawl Stone Soup](https://crawl.develz.org/) is a roguelike adventure game where players explore randomly generated dungeons, fight monsters, and attempt to retrieve the Orb of Zot. The game features:
+[Dungeon Crawl Stone Soup](https://crawl.develz.org/) is a roguelike adventure game where players explore randomly generated dungeons, fight monsters, and attempt to retrieve the Orb of Zot.
 
-- Turn-based gameplay
-- Complex character development
-- Procedurally generated levels
-- Permadeath mechanics
-- Rich tactical combat
+## Project Structure
+
+```
+.
+├── .env              # Environment variables
+├── pyproject.toml    # uv dependencies
+├── README.md         # This file
+└── src/
+    └── main.py       # Main script
+```
