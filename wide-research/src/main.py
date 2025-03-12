@@ -1,6 +1,7 @@
 from typing import Optional, List
 from scrapybara import Scrapybara
-from scrapybara.anthropic import Anthropic, UBUNTU_SYSTEM_PROMPT, BROWSER_SYSTEM_PROMPT
+from scrapybara.anthropic import Anthropic, UBUNTU_SYSTEM_PROMPT as ANTHROPIC_UBUNTU_SYSTEM_PROMPT, BROWSER_SYSTEM_PROMPT as ANTHROPIC_BROWSER_SYSTEM_PROMPT
+from scrapybara.openai import OpenAI, UBUNTU_SYSTEM_PROMPT as OPENAI_UBUNTU_SYSTEM_PROMPT, BROWSER_SYSTEM_PROMPT as OPENAI_BROWSER_SYSTEM_PROMPT
 from scrapybara.tools import ComputerTool, BashTool
 from scrapybara.types import Model
 from pydantic import BaseModel
@@ -26,6 +27,14 @@ class WideResearch:
     def __init__(self, model: Model, scrapybara_api_key: Optional[str] = None):
         load_dotenv()
         self.model = model
+        if isinstance(model, Anthropic):
+            self.ubuntu_system_prompt = ANTHROPIC_UBUNTU_SYSTEM_PROMPT
+            self.browser_system_prompt = ANTHROPIC_BROWSER_SYSTEM_PROMPT
+        elif isinstance(model, OpenAI):
+            self.ubuntu_system_prompt = OPENAI_UBUNTU_SYSTEM_PROMPT
+            self.browser_system_prompt = OPENAI_BROWSER_SYSTEM_PROMPT
+        else:
+            raise ValueError("Invalid model type")
         self.api_key = scrapybara_api_key or os.getenv("SCRAPYBARA_API_KEY", "YOUR_API_KEY")
         self.client = Scrapybara(api_key=self.api_key)
 
@@ -44,7 +53,7 @@ class WideResearch:
             companies_response = self.client.act(
                 model=self.model,
                 tools=tools,
-                system=BROWSER_SYSTEM_PROMPT,
+                system=self.browser_system_prompt,
                 prompt=f"Go to https://ycombinator.com/companies, set batch filter to W25, and extract ONLY the first {max_companies} W25 companies. Stop when you have seen {max_companies} companies.",
                 schema=Companies,
                 on_step=self.handle_step,
@@ -64,7 +73,7 @@ class WideResearch:
             contact_response = self.client.act(
                 model=self.model,
                 tools=tools,
-                system=BROWSER_SYSTEM_PROMPT,
+                system=self.browser_system_prompt,
                 prompt=f"Go to https://ycombinator.com/companies and find the best way to contact YC W25 company {company.name} - {company.description}. Try their website, LinkedIn, and Twitter/X.",
                 schema=ContactInfo,
                 on_step=self.handle_step,
@@ -102,13 +111,13 @@ class WideResearch:
         # Start Ubuntu instance to use LibreOffice
         instance = self.client.start_ubuntu()
         print("₍ᐢ•(ܫ)•ᐢ₎ Started Ubuntu instance: ", instance.get_stream_url().stream_url)
-        tools = [BashTool(instance), ComputerTool(instance)]
+        tools = [ComputerTool(instance)]
         
         try:
             self.client.act(
                 model=self.model,
                 tools=tools,
-                system=UBUNTU_SYSTEM_PROMPT,
+                system=self.ubuntu_system_prompt,
                 prompt=f"Open LibreOffice, draft a two sentence message to each of the following YC W25 companies, advertising a capybara zoo in Japan: {companies}",
                 on_step=self.handle_step,
             )
@@ -117,7 +126,8 @@ class WideResearch:
             instance.stop()
 
 async def main():
-    model = Anthropic()
+    model = OpenAI()
+    # model = Anthropic()
     agent = WideResearch(model=model)
     max_companies = 25
     max_parallel_instances = 5

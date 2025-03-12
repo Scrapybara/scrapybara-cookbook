@@ -159,7 +159,7 @@ wheels = [
 
 [[package]]
 name = "scrapybara"
-version = "2.3.6"
+version = "2.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
@@ -167,9 +167,9 @@ dependencies = [
     { name = "pydantic-core" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f9/42/af8ccdb6ef981b006faa6cb10c870ec2126484178144ae2111c57cb50671/scrapybara-2.3.6.tar.gz", hash = "sha256:9b685e025d5948d2c64da5fd413ac4c252308ebf0d776725a8b8b78ce85e4585", size = 42770 }
+sdist = { url = "https://files.pythonhosted.org/packages/d7/d4/54cdb11b69328c1c05468b20a505a5aceb45a7ae2dc92b64c5a76f2acb17/scrapybara-2.4.0.tar.gz", hash = "sha256:3e8114c8977454d320813ab7c04547b82de89b47874359c56fc2c28b2af28941", size = 43780 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/64/e9/abf11ecabdfc230557694707689299f0464d30d564b17a3adc1e57f66df7/scrapybara-2.3.6-py3-none-any.whl", hash = "sha256:538882f71f6429f8ac79490810a0afd3eb33288340e2029dc472d0db1aebb20d", size = 73062 },
+    { url = "https://files.pythonhosted.org/packages/f7/05/c65c2670c31e9d5111bd48f2ba003cd0ae2a242bfdfddef2cbeb76cc140d/scrapybara-2.4.0-py3-none-any.whl", hash = "sha256:4b9f7f145c060748d300cf24073273b38eab8c3e6fa90cb86a1df4f351319f60", size = 75004 },
 ]
 
 [[package]]
@@ -202,5 +202,5 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "python-dotenv", specifier = ">=1.0.1,<2" },
-    { name = "scrapybara", specifier = ">=2.3.6,<3" },
+    { name = "scrapybara", specifier = ">=2.4.0,<3" },
 ]

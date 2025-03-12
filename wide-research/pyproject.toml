@@ -6,7 +6,7 @@ authors = [{ name = "justin", email = "justin@scrapybara.com" }, { name = "nalin
 requires-python = "~=3.11"
 readme = "README.md"
 dependencies = [
-    "scrapybara>=2.3.6,<3",
+    "scrapybara>=2.4.0,<3",
     "python-dotenv>=1.0.1,<2",
 ]
 
