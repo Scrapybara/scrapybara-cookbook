@@ -1,9 +1,9 @@
 from typing import Optional, List
 from scrapybara import Scrapybara
-from scrapybara.anthropic import Anthropic, UBUNTU_SYSTEM_PROMPT as ANTHROPIC_UBUNTU_SYSTEM_PROMPT, BROWSER_SYSTEM_PROMPT as ANTHROPIC_BROWSER_SYSTEM_PROMPT
-from scrapybara.openai import OpenAI, UBUNTU_SYSTEM_PROMPT as OPENAI_UBUNTU_SYSTEM_PROMPT, BROWSER_SYSTEM_PROMPT as OPENAI_BROWSER_SYSTEM_PROMPT
-from scrapybara.tools import ComputerTool, BashTool
-from scrapybara.types import Model
+from scrapybara.anthropic import Anthropic, BROWSER_SYSTEM_PROMPT as ANTHROPIC_BROWSER_SYSTEM_PROMPT
+from scrapybara.openai import OpenAI, BROWSER_SYSTEM_PROMPT as OPENAI_BROWSER_SYSTEM_PROMPT
+from scrapybara.tools import ComputerTool
+from scrapybara.client import BaseInstance
 from pydantic import BaseModel
 from dotenv import load_dotenv
 import os
@@ -24,25 +24,17 @@ class ContactInfo(BaseModel):
     contact_details: str
 
 class WideResearch:
-    def __init__(self, model: Model, scrapybara_api_key: Optional[str] = None):
+    def __init__(self, scrapybara_api_key: Optional[str] = None):
         load_dotenv()
-        self.model = model
-        if isinstance(model, Anthropic):
-            self.ubuntu_system_prompt = ANTHROPIC_UBUNTU_SYSTEM_PROMPT
-            self.browser_system_prompt = ANTHROPIC_BROWSER_SYSTEM_PROMPT
-        elif isinstance(model, OpenAI):
-            self.ubuntu_system_prompt = OPENAI_UBUNTU_SYSTEM_PROMPT
-            self.browser_system_prompt = OPENAI_BROWSER_SYSTEM_PROMPT
-        else:
-            raise ValueError("Invalid model type")
         self.api_key = scrapybara_api_key or os.getenv("SCRAPYBARA_API_KEY", "YOUR_API_KEY")
         self.client = Scrapybara(api_key=self.api_key)
 
-    def handle_step(self, step):
-        print(f"₍ᐢ•(ܫ)•ᐢ₎: {step.text}")
+    def handle_step(self, step, instance: Optional[BaseInstance] = None):
+        instance_id = f" [{instance.id}]" if instance else ""
+        print(f"₍ᐢ•(ܫ)•ᐢ₎{instance_id}: {step.text}")
         if step.tool_calls:
             for call in step.tool_calls:
-                print(f"{call.tool_name} → {', '.join(f'{k}={v}' for k,v in call.args.items())}")
+                print(f"{call.tool_name}{instance_id} → {', '.join(f'{k}={v}' for k,v in call.args.items())}")
 
     def extract_companies(self, max_companies: int) -> List[Company]:
         instance = self.client.start_browser()
@@ -51,19 +43,19 @@ class WideResearch:
         
         try:
             companies_response = self.client.act(
-                model=self.model,
+                model=Anthropic(),
                 tools=tools,
-                system=self.browser_system_prompt,
-                prompt=f"Go to https://ycombinator.com/companies, set batch filter to W25, and extract ONLY the first {max_companies} W25 companies. Stop when you have seen {max_companies} companies.",
+                system=ANTHROPIC_BROWSER_SYSTEM_PROMPT,
+                prompt=f"Go to https://ycombinator.com/companies, set batch filter to W25, scroll down, and gather the first {max_companies} W25 companies. After you have seen {max_companies} companies, stop and return the companies with the structured output tool.",
                 schema=Companies,
-                on_step=self.handle_step,
+                on_step=lambda step: self.handle_step(step, instance),
             )
             print(f"\nScraped W25 companies: {companies_response.output.companies}")
             return companies_response.output.companies
         finally:
             instance.stop()
 
-    def find_company_contact_info(self, company: Company) -> ContactInfo:
+    def find_company_contact_info(self, company: Company) -> Optional[ContactInfo]:
         instance = self.client.start_browser()
         print("₍ᐢ•(ܫ)•ᐢ₎ Started Browser instance: ", instance.get_stream_url().stream_url)
         tools = [ComputerTool(instance)]
@@ -71,19 +63,27 @@ class WideResearch:
         try:
             print(f"\nFinding contact info for {company.name}...")
             contact_response = self.client.act(
-                model=self.model,
+                model=OpenAI(),
                 tools=tools,
-                system=self.browser_system_prompt,
-                prompt=f"Go to https://ycombinator.com/companies and find the best way to contact YC W25 company {company.name} - {company.description}. Try their website, LinkedIn, and Twitter/X.",
+                system=f"""{OPENAI_BROWSER_SYSTEM_PROMPT}
+### Task
+You are an expert contact method finder. Navigate to the YC W25 company {company.name} - {company.description}'s page and find a good contact method.
+A good contact method can be an email, a demo form, a Discord link, or any other way to reach the company.
+After you have found one contact method, you must immediately stop and return the contact info with the structured output tool with the contact method and the contact details.
+""",
+                prompt=f"Go to https://ycombinator.com/companies/{company.name.lower().replace(' ', '-')} and start finding their contact. DO NOT ASK FOR CONFIRMATION AND ALWAYS RETURN THE CONTACT INFO WITH STRUCTURED OUTPUT.",
                 schema=ContactInfo,
-                on_step=self.handle_step,
+                on_step=lambda step: self.handle_step(step, instance),
             )
             print(f"\nFound contact info for {company.name}: {contact_response.output}")
             return contact_response.output
+        except Exception as e:
+            print(f"Error processing {company.name}: {e}")
+            return None
         finally:
             instance.stop()
 
-    async def process_company_batch(self, companies: List[Company], max_workers: int) -> List[ContactInfo]:
+    async def process_company_batch(self, companies: List[Company], max_workers: int) -> List[Optional[ContactInfo]]:
         loop = asyncio.get_event_loop()
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             tasks = [
@@ -92,7 +92,7 @@ class WideResearch:
             ]
             return await asyncio.gather(*tasks)
 
-    async def find_contact_info(self, companies: List[Company], max_workers: int = 5) -> List[ContactInfo]:
+    async def find_contact_info(self, companies: List[Company], max_workers: int = 5) -> List[Optional[ContactInfo]]:
         all_contact_infos = []
         
         # Process companies in batches of max_workers size
@@ -107,30 +107,39 @@ class WideResearch:
         
         return all_contact_infos
 
-    def draft_messages(self, companies: List[Company]):
-        # Start Ubuntu instance to use LibreOffice
-        instance = self.client.start_ubuntu()
-        print("₍ᐢ•(ܫ)•ᐢ₎ Started Ubuntu instance: ", instance.get_stream_url().stream_url)
-        tools = [ComputerTool(instance)]
-        
-        try:
-            self.client.act(
-                model=self.model,
-                tools=tools,
-                system=self.ubuntu_system_prompt,
-                prompt=f"Open LibreOffice, draft a two sentence message to each of the following YC W25 companies, advertising a capybara zoo in Japan: {companies}",
-                on_step=self.handle_step,
-            )
-            print("\nDrafted messages")
-        finally:
-            instance.stop()
+    def save_contact_info(self, companies: List[Company], contact_infos: List[Optional[ContactInfo]]):
+        """Save the collected contact information to a markdown file with timestamp."""
+        from datetime import datetime
+        import os
+
+        # Create output directory if it doesn't exist
+        os.makedirs("output", exist_ok=True)
+
+        # Generate timestamp for the filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"output/contact_info_{timestamp}.md"
+
+        with open(filename, "w") as f:
+            f.write("# YC W25 Company Contact Information\n")
+            f.write(f"*Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*\n\n")
+
+            for company, contact_info in zip(companies, contact_infos):
+                f.write(f"## {company.name}\n")
+                f.write(f"**Description:** {company.description}\n")
+                f.write(f"**Tags:** {', '.join(company.tags)}\n")
+                if contact_info is not None:
+                    f.write(f"**Contact Method:** {contact_info.contact_method}\n")
+                    f.write(f"**Contact Details:** {contact_info.contact_details}\n")
+                else:
+                    f.write("**Status:** Failed to retrieve contact information\n")
+                f.write("\n")
+
+        print(f"\n₍ᐢ•(ܫ)•ᐢ₎ Saved contact information to {filename}")
 
 async def main():
-    model = OpenAI()
-    # model = Anthropic()
-    agent = WideResearch(model=model)
-    max_companies = 25
-    max_parallel_instances = 5
+    agent = WideResearch()
+    max_companies = 20
+    max_parallel_instances = 4
 
     try:
         # Extract companies
@@ -140,8 +149,8 @@ async def main():
         contact_infos = await agent.find_contact_info(companies, max_parallel_instances)
         print("\nAll contact info gathered:", contact_infos)
         
-        # Draft messages
-        agent.draft_messages(companies)
+        # Save contact information to file
+        agent.save_contact_info(companies, contact_infos)
     except Exception as e:
         print(f"Error: {e}")
 
