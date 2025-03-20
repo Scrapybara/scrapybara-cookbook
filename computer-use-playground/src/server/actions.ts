@@ -69,3 +69,24 @@ export async function stopInstance({
     });
   }
 }
+
+export async function getInstance({
+  apiKey,
+  instanceId,
+}: {
+  apiKey: string;
+  instanceId: string;
+}) {
+  try {
+    const client = new ScrapybaraClient({ apiKey });
+    const instance = await client.get(instanceId);
+    return JSON.stringify(instance);
+  } catch (error) {
+    return JSON.stringify({
+      error:
+        error instanceof Error
+          ? error.message
+          : "Unknown error getting instance",
+    });
+  }
+}

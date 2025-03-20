@@ -1,3 +1,4 @@
+import { getInstance } from "@/server/actions";
 import {
   type Scrapybara,
   ScrapybaraClient,
@@ -25,6 +26,8 @@ export async function POST(req: Request) {
       modelName: string;
       messages: Scrapybara.Message[];
     };
+
+  const abortController = new AbortController();
 
   // Create a streaming response to send real-time updates back to the client
   const stream = new ReadableStream({
@@ -68,12 +71,29 @@ export async function POST(req: Request) {
           onToolMessage: (message: Scrapybara.ToolMessage) => {
             controller.enqueue(`${JSON.stringify(message)}\n`);
           },
+          onStep: () => {
+            (async () => {
+              const response = await getInstance({
+                apiKey,
+                instanceId,
+              });
+              const parsedResponse = JSON.parse(response);
+              if (parsedResponse.status !== "running" || parsedResponse.error) {
+                throw new Error("Instance has terminated");
+              }
+            })().catch(() => {
+              abortController.abort();
+            });
+          },
           requestOptions: {
-            abortSignal: req.signal,
+            abortSignal: abortController.signal,
           },
         });
       } catch (error) {
-        if (error instanceof Error) {
+        if (
+          error instanceof Error &&
+          error.message !== "The user aborted a request"
+        ) {
           controller.enqueue(`${JSON.stringify({ error: error.message })}\n`);
           console.error(error.message);
         }

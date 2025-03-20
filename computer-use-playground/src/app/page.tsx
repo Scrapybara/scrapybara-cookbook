@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ArrowUp, Github, Key, RotateCcw } from "lucide-react";
 import Textarea from "react-textarea-autosize";
@@ -55,6 +55,7 @@ export default function Chat() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [isStopping, setIsStopping] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -105,6 +106,8 @@ export default function Chat() {
     setIsStreaming(true);
     setMessages(newMessages);
     setInput("");
+
+    abortControllerRef.current = new AbortController();
 
     let newInstanceId;
     if (!instanceId) {
@@ -169,7 +172,7 @@ export default function Chat() {
       while (true) {
         try {
           const { done, value } = await reader.read();
-          if (done) break;
+          if (done || abortControllerRef.current?.signal.aborted) break;
 
           // Decode and accumulate incoming chunks
           const text = new TextDecoder().decode(value);
@@ -218,12 +221,18 @@ export default function Chat() {
     } finally {
       setIsStreaming(false);
       reader.releaseLock();
+      abortControllerRef.current = null;
     }
   };
 
   const handleStop = async () => {
     if (!instanceId) return;
     setIsStopping(true);
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
     try {
       const response = await stopInstance({
         apiKey,
@@ -235,15 +244,16 @@ export default function Chat() {
       if (parsedResponse.error) {
         throw new Error(parsedResponse.error);
       }
-    } catch (error) {
-      toast.error("Failed to stop instance", {
-        description: error instanceof Error && error.message,
-      });
-    } finally {
+
       setInstanceId(null);
       setStreamUrl(null);
       setMessages([]);
       setIsStopping(false);
+      setIsStreaming(false);
+    } catch (error) {
+      toast.error("Failed to stop instance", {
+        description: error instanceof Error && error.message,
+      });
     }
   };
 
