@@ -1,5 +1,6 @@
 import { ScrapybaraClient, Scrapybara, UbuntuInstance } from "scrapybara";
 import { anthropic, UBUNTU_SYSTEM_PROMPT } from "scrapybara/anthropic";
+// import { openai, UBUNTU_SYSTEM_PROMPT } from "scrapybara/openai";
 import { editTool, bashTool, computerTool } from "scrapybara/tools";
 import * as dotenv from "dotenv";
 import { chromium, Page, Browser } from "playwright";
@@ -35,9 +36,12 @@ class CopyCapy {
     await page.waitForTimeout(2000);
 
     // Scroll to bottom for dynamic content
-    await page.evaluate(() => {
-      window.scrollTo(0, document.body.scrollHeight);
-    });
+    await Promise.race([
+      page.evaluate(() => {
+        window.scrollTo(0, document.body.scrollHeight);
+      }),
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+    ]);
     await page.waitForTimeout(2000);
 
     // Get CSS URLs and content
@@ -102,7 +106,6 @@ class CopyCapy {
           }
         }
       });
-
       return root.outerHTML;
     }, url);
 
@@ -125,10 +128,6 @@ class CopyCapy {
       await page.goto(url, { waitUntil: "networkidle" });
       const pageData = await this.scrapePageData(page);
 
-      // Save files to instance
-      const outputDir = "/tmp/copycapy";
-      await this.instance.bash({ command: `mkdir -p ${outputDir}` });
-
       // Save HTML with CSS links
       const cssLinks = pageData.css
         .map((_, i) => `<link rel="stylesheet" href="style_${i}.css">`)
@@ -137,19 +136,17 @@ class CopyCapy {
         "</head>",
         `    ${cssLinks}\n  </head>`
       );
-      await this.instance.edit({
-        command: "create",
-        path: `${outputDir}/index.html`,
-        fileText: html,
+      await this.instance.file.write({
+        path: `copycapy/index.html`,
+        content: html,
       });
 
       // Save CSS files
       await Promise.all(
         pageData.css.map((css, i) =>
-          this.instance!.edit({
-            command: "create",
-            path: `${outputDir}/style_${i}.css`,
-            fileText: css,
+          this.instance!.file.write({
+            path: `copycapy/style_${i}.css`,
+            content: css,
           })
         )
       );
@@ -165,7 +162,7 @@ class CopyCapy {
         ],
         system: `${UBUNTU_SYSTEM_PROMPT}
 <TASK>
-You are an expert web developer. A webscraper has saved the HTML/CSS for ${url} at /tmp/copycapy.
+You are an expert web developer. A webscraper has saved the HTML/CSS for ${url} at /home/scrapybara/copycapy.
 Your job is to customize the page to make it capybara-themed.
 Open the index.html file in Chromium and edit the HTML/CSS to make it capybara-themed.
 Make it fun!
@@ -208,8 +205,9 @@ Make it fun!
 
 // Example usage
 const model = anthropic();
+// const model = openai();
 const copyCapy = new CopyCapy(model);
 
-await copyCapy.capyfy("https://ycombinator.com");
+await copyCapy.capyfy("https://manus.im");
 
 export default CopyCapy;
