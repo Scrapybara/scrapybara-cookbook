@@ -1,4 +1,4 @@
-# Chat Playground
+# Computer Use Playground
 
 <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-blue.svg?logo=TypeScript&logoColor=white" />
 
