@@ -266,7 +266,7 @@ export default function Chat() {
         <h1 className="text-lg font-semibold">Computer Use Playground</h1>
         <Button variant="outline" asChild>
           <a
-            href="https://github.com/scrapybara/scrapybara-cookbook/blob/main/chat-playground"
+            href="https://github.com/scrapybara/scrapybara-cookbook/blob/main/computer-use-playground"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2"
