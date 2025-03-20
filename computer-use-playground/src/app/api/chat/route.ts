@@ -61,9 +61,12 @@ export async function POST(req: Request) {
               ? ANTHROPIC_BROWSER_SYSTEM_PROMPT
               : OPENAI_BROWSER_SYSTEM_PROMPT,
           messages,
-          // Send each step as a newline-delimited JSON object
-          onStep: (step) => {
-            controller.enqueue(`${JSON.stringify(step)}\n`);
+          // Send messages as newline-delimited JSON objects
+          onAssistantMessage: (message: Scrapybara.AssistantMessage) => {
+            controller.enqueue(`${JSON.stringify(message)}\n`);
+          },
+          onToolMessage: (message: Scrapybara.ToolMessage) => {
+            controller.enqueue(`${JSON.stringify(message)}\n`);
           },
           requestOptions: {
             abortSignal: req.signal,

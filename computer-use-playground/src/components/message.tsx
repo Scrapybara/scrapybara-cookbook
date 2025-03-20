@@ -4,12 +4,14 @@ import remarkGfm from "remark-gfm";
 import type { Scrapybara } from "scrapybara";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
+import Loader from "./loader";
 
 interface MessageProps {
   message: Scrapybara.Message;
+  isLastMessage?: boolean;
 }
 
-export function Message({ message }: MessageProps) {
+export function Message({ message, isLastMessage = false }: MessageProps) {
   if (
     message.role === "tool" &&
     (!message.content ||
@@ -32,7 +34,7 @@ export function Message({ message }: MessageProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
       className={cn(
-        "flex w-max max-w-[86.9%] flex-col gap-4 py-2",
+        "flex w-max max-w-[86.9%] flex-col gap-4 py-2.5",
         message.role === "user" &&
           "ml-auto bg-primary text-primary-foreground px-4 rounded-lg"
       )}
@@ -112,9 +114,15 @@ export function Message({ message }: MessageProps) {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: i * 0.1, duration: 0.3 }}
-                      className="flex flex-col gap-2 font-mono border border-primary rounded-lg p-2 px-4 text-sm"
+                      className="flex flex-col gap-2 font-mono border border-primary rounded-lg py-2.5 px-4 text-sm relative"
                     >
-                      <div className="flex items-center gap-2 font-medium text-primary">
+                      {/* Show loader if this is the last message */}
+                      {isLastMessage && message.role === "assistant" && (
+                        <div className="absolute top-1.5 right-1.5">
+                          <Loader className="w-3 h-3" />
+                        </div>
+                      )}
+                      <div className="relative flex items-center gap-2 font-medium text-primary">
                         {part.toolName === "computer" && (
                           <Computer size={12} strokeWidth={2.5} />
                         )}

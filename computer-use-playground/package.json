@@ -22,7 +22,7 @@
     "react-markdown": "^10.1.0",
     "react-textarea-autosize": "^8.5.8",
     "remark-gfm": "^4.0.1",
-    "scrapybara": "^2.4.1",
+    "scrapybara": "^2.4.2",
     "sonner": "^2.0.1",
     "tailwind-merge": "^3.0.2",
     "tw-animate-css": "^1.2.4"

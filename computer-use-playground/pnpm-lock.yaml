@@ -48,8 +48,8 @@ importers:
         specifier: ^4.0.1
         version: 4.0.1
       scrapybara:
-        specifier: ^2.4.1
-        version: 2.4.1
+        specifier: ^2.4.2
+        version: 2.4.2
       sonner:
         specifier: ^2.0.1
         version: 2.0.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -2184,8 +2184,8 @@ packages:
   scheduler@0.25.0:
     resolution: {integrity: sha512-xFVuu11jh+xcO7JOAGJNOXld8/TcEHK/4CituBUeUb5hqxJLj9YuemAEuvm9gQ/+pgXYfbQuqAkiYu+u7YEsNA==}
 
-  scrapybara@2.4.1:
-    resolution: {integrity: sha512-WMlJUX8jHc1HdeNmPXe9PO1OR6083GC/EQ/+KOdXYV07sv+F0XmLan8lmrCeW+qAliAgS+usTRgQeIte13JVyw==}
+  scrapybara@2.4.2:
+    resolution: {integrity: sha512-gKyheiOu/DRnbJvpAoONSOMErt6Z7O/vKb4oryEyXugYo7Fs5Rz4VKLRMl6tiwPPlBjnDz4g/hwpKeGquToeyg==}
 
   semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
@@ -4958,7 +4958,7 @@ snapshots:
 
   scheduler@0.25.0: {}
 
-  scrapybara@2.4.1:
+  scrapybara@2.4.2:
     dependencies:
       form-data: 4.0.2
       formdata-node: 6.0.3

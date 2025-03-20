@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { ArrowUp, Github, Key, Pause, RotateCcw } from "lucide-react";
+import { ArrowUp, Github, Key, RotateCcw } from "lucide-react";
 import Textarea from "react-textarea-autosize";
 import type { Scrapybara } from "scrapybara";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ import { SiAnthropic, SiOpenai } from "react-icons/si";
 import { Messages } from "@/components/messages";
 import { ChatWelcome } from "@/components/chat-welcome";
 import { InstanceFrame } from "@/components/instance-frame";
+import { Loader } from "@/components/loader";
 
 const models = [
   {
@@ -54,16 +55,6 @@ export default function Chat() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [isStopping, setIsStopping] = useState(false);
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort("Page unmounted");
-        abortControllerRef.current = null;
-      }
-    };
-  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -102,9 +93,7 @@ export default function Chat() {
       return;
     }
 
-    if (isStreaming && abortControllerRef.current) {
-      abortControllerRef.current.abort("Manual abort");
-      setIsStreaming(false);
+    if (isStreaming) {
       return;
     }
 
@@ -116,9 +105,6 @@ export default function Chat() {
     setIsStreaming(true);
     setMessages(newMessages);
     setInput("");
-
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
 
     let newInstanceId;
     if (!instanceId) {
@@ -165,19 +151,22 @@ export default function Chat() {
         modelName: selectedModel,
         messages: newMessages,
       }),
-      signal: controller.signal,
     });
 
     if (!response.ok) {
+      setIsStreaming(false);
       return;
     }
 
     const reader = response.body?.getReader();
-    if (!reader) return;
+    if (!reader) {
+      setIsStreaming(false);
+      return;
+    }
 
     try {
       let buffer = "";
-      while (true && abortControllerRef.current) {
+      while (true) {
         try {
           const { done, value } = await reader.read();
           if (done) break;
@@ -187,12 +176,12 @@ export default function Chat() {
           buffer += text;
 
           // Split buffer by newlines - each line is a complete JSON message
-          const steps = buffer.split("\n");
-          buffer = steps.pop() || ""; // Keep the incomplete chunk for next iteration
+          const messages = buffer.split("\n");
+          buffer = messages.pop() || ""; // Keep the incomplete chunk for next iteration
 
-          for (const step of steps.filter(Boolean)) {
+          for (const message of messages.filter(Boolean)) {
             try {
-              const data = JSON.parse(step) as Scrapybara.Step;
+              const data = JSON.parse(message);
 
               if ("error" in data && typeof data.error === "string") {
                 if (data.error.includes("agent credits")) {
@@ -205,38 +194,20 @@ export default function Chat() {
                 continue;
               }
 
-              const newMessages: Scrapybara.Message[] = [];
-
-              const assistantMsg: Scrapybara.AssistantMessage = {
-                role: "assistant",
-                responseId: data.responseId,
-                content: [
-                  ...(data.reasoningParts || []),
-                  { type: "text" as const, text: data.text },
-                  ...(data.toolCalls || []),
-                ],
-              };
-              if (data.text || data.reasoningParts || data.toolCalls) {
-                newMessages.push(assistantMsg);
+              // Handle the message based on its role
+              if (data.role === "assistant") {
+                setMessages((prev) => filterImages([...prev, data], 4));
+              } else if (data.role === "tool") {
+                setMessages((prev) => filterImages([...prev, data], 4));
               }
-
-              if (data.toolResults) {
-                const toolMsg: Scrapybara.ToolMessage = {
-                  role: "tool",
-                  content: data.toolResults,
-                };
-                newMessages.push(toolMsg);
-              }
-
-              setMessages((prev) => filterImages([...prev, ...newMessages], 4));
             } catch (e) {
-              toast.error("Failed to parse step", {
+              toast.error("Failed to parse message", {
                 description: e instanceof Error ? e.message : "Unknown error",
               });
             }
           }
         } catch (error) {
-          if (error instanceof Error && error.name !== "AbortError") {
+          if (error instanceof Error) {
             toast.error("Error reading stream", {
               description: error.message,
             });
@@ -246,7 +217,6 @@ export default function Chat() {
       }
     } finally {
       setIsStreaming(false);
-      abortControllerRef.current = null;
       reader.releaseLock();
     }
   };
@@ -254,10 +224,6 @@ export default function Chat() {
   const handleStop = async () => {
     if (!instanceId) return;
     setIsStopping(true);
-    if (isStreaming && abortControllerRef.current) {
-      abortControllerRef.current.abort("Manual abort");
-      abortControllerRef.current = null;
-    }
     try {
       const response = await stopInstance({
         apiKey,
@@ -467,12 +433,17 @@ export default function Chat() {
                       (!input.trim() && !isStreaming) ||
                       (!apiKey && !input.trim()) ||
                       isStarting ||
-                      isStopping
+                      isStopping ||
+                      isStreaming
                     }
                     size="icon"
                     className="flex-shrink-0"
                   >
-                    {isStreaming ? <Pause size={16} /> : <ArrowUp size={16} />}
+                    {isStreaming ? (
+                      <Loader className="w-4 h-4" variant="foreground" />
+                    ) : (
+                      <ArrowUp size={16} />
+                    )}
                   </Button>
                 </div>
               </form>

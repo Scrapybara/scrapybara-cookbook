@@ -42,7 +42,11 @@ export function Messages({ messages }: MessagesProps) {
     >
       <div className="flex flex-col gap-4 py-8">
         {messages.map((message, index) => (
-          <Message key={index} message={message} />
+          <Message
+            key={index}
+            message={message}
+            isLastMessage={index === messages.length - 1}
+          />
         ))}
         <div ref={messagesEndRef} />
       </div>
