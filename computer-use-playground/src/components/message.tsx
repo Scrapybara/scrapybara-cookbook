@@ -160,17 +160,17 @@ export function Message({ message }: MessageProps) {
                     transition={{ delay: 0.2, duration: 0.4 }}
                   >
                     {result.output && (
-                      <p className="font-mono text-sm whitespace-pre-wrap break-all">
+                      <p className="font-mono text-sm whitespace-pre-wrap break-all border rounded-lg p-2 px-4">
                         {result.output}
                       </p>
                     )}
                     {result.system && (
-                      <p className="font-mono text-sm whitespace-pre-wrap break-all">
+                      <p className="font-mono text-sm whitespace-pre-wrap break-all border rounded-lg p-2 px-4">
                         {result.system}
                       </p>
                     )}
                     {result.error && (
-                      <p className="whitespace-pre-wrap break-all text-destructive">
+                      <p className="font-mono text-sm whitespace-pre-wrap break-all text-destructive border border-destructive rounded-lg p-2 px-4">
                         {result.error}
                       </p>
                     )}
