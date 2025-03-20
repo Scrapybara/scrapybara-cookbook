@@ -93,11 +93,7 @@ export function InstanceFrame({
           </Button>
         </div>
       </div>
-      <div
-        className={cn(
-          "w-full aspect-[4/3] rounded-b-lg overflow-hidden border border-t-0 shadow-sm"
-        )}
-      >
+      <div className={cn("w-full aspect-[4/3] rounded-b-lg overflow-hidden")}>
         {isStarting && (
           <div className="w-full h-full flex items-center justify-center bg-muted">
             <div className="flex flex-col items-center gap-4">

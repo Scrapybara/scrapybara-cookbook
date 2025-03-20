@@ -3,6 +3,7 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Scrapybara } from "scrapybara";
 import { cn } from "@/lib/utils";
+import { motion } from "motion/react";
 
 interface MessageProps {
   message: Scrapybara.Message;
@@ -26,7 +27,10 @@ export function Message({ message }: MessageProps) {
   }
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       className={cn(
         "flex w-max max-w-[86.9%] flex-col gap-4 py-2",
         message.role === "user" &&
@@ -48,7 +52,13 @@ export function Message({ message }: MessageProps) {
                 if (part.type === "reasoning") {
                   if (!part.reasoning) return null;
                   return (
-                    <div key={i} className="text-muted-foreground my-4">
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: i * 0.1, duration: 0.4 }}
+                      className="text-muted-foreground my-4"
+                    >
                       <Markdown
                         remarkPlugins={[remarkGfm]}
                         components={{
@@ -64,13 +74,19 @@ export function Message({ message }: MessageProps) {
                       >
                         {part.reasoning}
                       </Markdown>
-                    </div>
+                    </motion.div>
                   );
                 }
                 if (part.type === "text") {
                   if (!part.text) return null;
                   return (
-                    <div key={i} className="my-4">
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: i * 0.1, duration: 0.4 }}
+                      className="my-4"
+                    >
                       <Markdown
                         remarkPlugins={[remarkGfm]}
                         components={{
@@ -86,13 +102,16 @@ export function Message({ message }: MessageProps) {
                       >
                         {part.text}
                       </Markdown>
-                    </div>
+                    </motion.div>
                   );
                 }
                 if (part.type === "tool-call") {
                   return (
-                    <div
+                    <motion.div
                       key={i}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.1, duration: 0.3 }}
                       className="flex flex-col gap-2 font-mono border border-primary rounded-lg p-2 px-4 text-sm"
                     >
                       <div className="flex items-center gap-2 font-medium text-primary">
@@ -112,7 +131,7 @@ export function Message({ message }: MessageProps) {
                           .map(([key, value]) => `${key}: ${String(value)}`)
                           .join("\n")}
                       </p>
-                    </div>
+                    </motion.div>
                   );
                 }
                 return null;
@@ -134,7 +153,12 @@ export function Message({ message }: MessageProps) {
                   return null;
 
                 return (
-                  <div key={i}>
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2, duration: 0.4 }}
+                  >
                     {result.output && (
                       <p className="font-mono text-sm whitespace-pre-wrap break-all">
                         {result.output}
@@ -150,13 +174,13 @@ export function Message({ message }: MessageProps) {
                         {result.error}
                       </p>
                     )}
-                  </div>
+                  </motion.div>
                 );
               })}
             </>
           )}
         </>
       )}
-    </div>
+    </motion.div>
   );
 }

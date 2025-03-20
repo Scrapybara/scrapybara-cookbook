@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { House, Luggage, Sandwich, LucideIcon } from "lucide-react";
+import { motion } from "motion/react";
 
 interface ChatWelcomeProps {
   apiKey: string;
@@ -37,14 +38,26 @@ export function ChatWelcome({ apiKey, setInput }: ChatWelcomeProps) {
   return (
     <div className="flex flex-col flex-grow justify-center">
       <div className="flex flex-col gap-8 pb-16">
-        <h1 className="relative text-left text-2xl font-medium w-full">
-          {!apiKey
-            ? "Enter your Scrapybara API key to start"
-            : "How can I help?"}
-        </h1>
+        <motion.h1
+          className="relative text-left text-2xl font-medium w-full"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+        >
+          How can I help?
+        </motion.h1>
         <div className="flex flex-col gap-1 -mx-3">
           {prompts.map((prompt, index) => (
-            <div key={prompt.title}>
+            <motion.div
+              key={prompt.title}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                delay: index * 0.1,
+                duration: 0.3,
+                ease: "easeOut",
+              }}
+            >
               <Button
                 variant="ghost"
                 className="flex w-full justify-start gap-2"
@@ -57,7 +70,7 @@ export function ChatWelcome({ apiKey, setInput }: ChatWelcomeProps) {
               {index < prompts.length - 1 && (
                 <hr className="border-border mt-1 mx-3" />
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

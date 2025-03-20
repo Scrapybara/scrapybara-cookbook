@@ -65,11 +65,32 @@ export default function Chat() {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedApiKey = localStorage.getItem("apiKey");
+      if (savedApiKey) {
+        setApiKey(savedApiKey);
+      }
+    }
+  }, []);
+
   const handleApiKeySubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim()) {
-      setApiKey(input.trim());
+      const newApiKey = input.trim();
+      setApiKey(newApiKey);
+      // Save to localStrage
+      if (typeof window !== "undefined") {
+        localStorage.setItem("apiKey", newApiKey);
+      }
       setInput("");
+    }
+  };
+
+  const handleResetApiKey = () => {
+    setApiKey("");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("apiKey");
     }
   };
 
@@ -264,17 +285,29 @@ export default function Chat() {
     <div className="w-full h-full p-4 md:p-8">
       <header className="absolute top-4 right-4 left-4 flex justify-between items-center">
         <h1 className="text-lg font-semibold">Computer Use Playground</h1>
-        <Button variant="outline" asChild>
-          <a
-            href="https://github.com/scrapybara/scrapybara-cookbook/blob/main/computer-use-playground"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2"
-          >
-            <Github size={16} />
-            <span className="hidden sm:inline">GitHub</span>
-          </a>
-        </Button>
+        <div className="flex gap-2">
+          {apiKey && (
+            <Button
+              variant="outline"
+              onClick={handleResetApiKey}
+              className="flex items-center gap-2"
+            >
+              <Key size={16} />
+              <span className="hidden sm:inline">Reset API key</span>
+            </Button>
+          )}
+          <Button variant="outline" asChild>
+            <a
+              href="https://github.com/scrapybara/scrapybara-cookbook/blob/main/computer-use-playground"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2"
+            >
+              <Github size={16} />
+              <span className="hidden sm:inline">GitHub</span>
+            </a>
+          </Button>
+        </div>
       </header>
 
       <div
@@ -410,13 +443,6 @@ export default function Chat() {
                           </SelectItem>
                         </SelectContent>
                       </Select>
-                      <Button
-                        variant="outline"
-                        onClick={() => setApiKey("")}
-                        className="text-muted-foreground"
-                      >
-                        <Key size={16} />
-                      </Button>
                     </>
                   )}
                 </div>
