@@ -183,8 +183,11 @@ export default function Chat() {
           buffer = messages.pop() || ""; // Keep the incomplete chunk for next iteration
 
           for (const message of messages.filter(Boolean)) {
+            // Skip flush pings
+            if (message.startsWith(": flush")) continue;
+
             try {
-              const data = JSON.parse(message);
+              const data = JSON.parse(message) as Scrapybara.Message;
 
               if ("error" in data && typeof data.error === "string") {
                 if (data.error.includes("agent credits")) {

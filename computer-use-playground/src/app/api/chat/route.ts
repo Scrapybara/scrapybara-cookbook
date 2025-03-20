@@ -67,9 +67,13 @@ export async function POST(req: Request) {
           // Send messages as newline-delimited JSON objects
           onAssistantMessage: (message: Scrapybara.AssistantMessage) => {
             controller.enqueue(`${JSON.stringify(message)}\n`);
+            // Add a flush ping to force immediate transmission
+            controller.enqueue(": flush\n");
           },
           onToolMessage: (message: Scrapybara.ToolMessage) => {
             controller.enqueue(`${JSON.stringify(message)}\n`);
+            // Add a flush ping to force immediate transmission
+            controller.enqueue(": flush\n");
           },
           onStep: () => {
             (async () => {
