@@ -18,8 +18,8 @@ importers:
         specifier: ^1.51.0
         version: 1.51.0
       scrapybara:
-        specifier: ^2.3.8
-        version: 2.3.8
+        specifier: ^2.4.1
+        version: 2.4.1
       zod:
         specifier: ^3.24.2
         version: 3.24.2
@@ -349,8 +349,8 @@ packages:
   safe-buffer@5.2.1:
     resolution: {integrity: sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==}
 
-  scrapybara@2.3.8:
-    resolution: {integrity: sha512-DOq0eAsjc/zFzozlySdNZZA7pzaRwmkSJAHZK/FDPj2VV2ICZhu2i5ILCHjEd6gC5so839iySdZLd5lidUMNvA==}
+  scrapybara@2.4.1:
+    resolution: {integrity: sha512-WMlJUX8jHc1HdeNmPXe9PO1OR6083GC/EQ/+KOdXYV07sv+F0XmLan8lmrCeW+qAliAgS+usTRgQeIte13JVyw==}
 
   side-channel-list@1.0.0:
     resolution: {integrity: sha512-FCLHtRD/gnpCiCHEiJLOwdmFP+wzCmDEkc9y7NsYxeF4u7Btsn1ZuwgwJGxImImHicJArLP4R0yX4c2KCrMrTA==}
@@ -648,7 +648,7 @@ snapshots:
 
   safe-buffer@5.2.1: {}
 
-  scrapybara@2.3.8:
+  scrapybara@2.4.1:
     dependencies:
       form-data: 4.0.1
       formdata-node: 6.0.3
